@@ -16,7 +16,7 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 LIBS=-lm
 
-$(ODIR)/%.o: %.c
+$(ODIR)/%.o: %.c mesch
 	mkdir -p $(ODIR)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
@@ -24,12 +24,14 @@ $(ODIR)/%.o: %.c
 LittleBro: $(OBJ) meschach.a
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
-meschach.a:
+meschach.a: mesch
+	$(MAKE) -C mesch
+	mv mesch/meschach.a .
+
+mesch:
 	mkdir -p mesch
 	wget http://homepage.divms.uiowa.edu/~dstewart/meschach/mesch12b.tar.gz
 	tar -zxvf mesch12b.tar.gz -C mesch
-	$(MAKE) -C mesch
-	mv mesch/meschach.a .
 	rm -f mesch12b.tar.gz
 
 
