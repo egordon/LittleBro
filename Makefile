@@ -30,7 +30,7 @@ meschach.a: mesch
 
 mesch:
 	mkdir -p mesch
-	wget http://homepage.divms.uiowa.edu/~dstewart/meschach/mesch12b.tar.gz
+	curl -OL http://homepage.divms.uiowa.edu/~dstewart/meschach/mesch12b.tar.gz
 	tar -zxvf mesch12b.tar.gz -C mesch
 	rm -f mesch12b.tar.gz
 
