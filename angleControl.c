@@ -20,7 +20,7 @@ static VEC *angleState;
 
 
 /* function to run Kalman filter, given the previous state */
-AngleState_T Kalman(AngleState_T prev, ) {
+AngleState_T Kalman(AngleState_T prev) {
 
 }
 
