@@ -9,3 +9,9 @@ Installation
 * Just run ```make```.
 * Clean up old builds with ```make clean```.
 * Purge Meschach with ```make purge```.
+
+Add Files
+==
+* Add a new C file
+* Put Headers in ./inc
+* Edit Makefile: add header to DEPS, add C file as .o to OBJ
