@@ -7,7 +7,7 @@ ODIR=obj
 LDIR =../lib
 
 # Add all custom header files here
-_DEPS = angleControl.h
+_DEPS = angleControl.h pid.h motors.h sensor.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 # Add all C files here.
