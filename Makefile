@@ -43,6 +43,7 @@ mesch:
 clean:
 	rm -f $(ODIR)/*.o *~ $(INCDIR)/*~ *.o
 	rm -f LittleBro
+	rm -f testpid
 
 purge: clean
 	rm -f meschach.a
