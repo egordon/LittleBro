@@ -40,3 +40,6 @@ obj/*
 
 # Final Exec
 LittleBro
+
+# Other binaries
+pid
