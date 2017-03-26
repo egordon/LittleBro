@@ -1,7 +1,7 @@
 #ifndef PID_H
 #define PID_H
 
-typedef struct PID PID_T;
+typedef struct PID *PID_T;
 
 PID_T PID_init();
 
