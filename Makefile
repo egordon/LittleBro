@@ -11,7 +11,7 @@ _DEPS = angleControl.h pid.h motors.h sensor.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 # Add all C files here.
-_OBJ = LittleBro.o pid.o
+_OBJ = LittleBro.o pid.o testpid.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 LIBS=-lm
@@ -19,6 +19,12 @@ LIBS=-lm
 $(ODIR)/%.o: %.c mesch
 	mkdir -p $(ODIR)
 	$(CC) -c -o $@ $< $(CFLAGS)
+
+testpid: $(ODIR)/testpid.o $(ODIR)/pid.o
+	gcc -o $@ $^ $(CFLAGS) $(LIBS)
+
+pid: $(ODIR)/pid.o
+	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
 LittleBro: $(OBJ) meschach.a
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
@@ -34,25 +40,12 @@ mesch:
 	rm -f mesch12b.tar.gz
 
 
-.PHONY: clean purge upload
+.PHONY: clean
 clean:
-	rm -rf $(ODIR) *~ $(INCDIR)/*~ *.o
+	rm -f $(ODIR)/*.o *~ $(INCDIR)/*~ *.o
 	rm -f LittleBro
 	rm -f pid
 
 purge: clean
 	rm -f meschach.a
 	rm -rf mesch
-
-upload: clean
-	# Kill Previous Code
-	ssh pi 'killall LitleBro'
-	ssh pi 'rm -rf code'
-	# Upload New Code
-	#scp -r ./* pi:/home/pi/code
-	#ssh -t -t pi <<'ENDSSH'
-	#cd code
-	#rm -f meschach.a mesch/meschach.a
-	#make
-	#./LittleBro
-	#ENDSSH
