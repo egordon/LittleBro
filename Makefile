@@ -38,21 +38,23 @@ mesch:
 clean:
 	rm -rf $(ODIR) *~ $(INCDIR)/*~ *.o
 	rm -f LittleBro
-	rm -f pid
 
 purge: clean
 	rm -f meschach.a
+	rm -rf mesch/*.o
 	rm -rf mesch
 
 upload: clean
 	# Kill Previous Code
-	ssh pi 'killall LitleBro'
-	ssh pi 'rm -rf code'
+	ssh pi 'killall LitleBro || true'
+	ssh pi 'cd code; make clean'
 	# Upload New Code
-	#scp -r ./* pi:/home/pi/code
-	#ssh -t -t pi <<'ENDSSH'
-	#cd code
-	#rm -f meschach.a mesch/meschach.a
-	#make
-	#./LittleBro
-	#ENDSSH
+	scp -r ./*.c pi:/home/pi/code
+	scp -r ./Makefile pi:/home/pi/code
+	scp -r ./inc pi:/home/pi/code
+	# Run New Code
+	ssh pi 'cd code; make'
+	ssh pi './code/LittleBro </dev/null >/home/pi/run.log 2>&1 &'
+
+log:
+	ssh pi 'tail -f run.log' || true
