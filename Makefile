@@ -16,11 +16,16 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 LIBS=-lm
 
+all: LittleBro
+
 $(ODIR)/%.o: %.c mesch
 	mkdir -p $(ODIR)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 LittleBro: $(OBJ) meschach.a
+	gcc -o $@ $^ $(CFLAGS) $(LIBS)
+
+testpid: $(ODIR)/testpid.o $(ODIR)/pid.o
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
 meschach.a: mesch
@@ -34,9 +39,9 @@ mesch:
 	rm -f mesch12b.tar.gz
 
 
-.PHONY: clean purge upload
+.PHONY: clean
 clean:
-	rm -rf $(ODIR) *~ $(INCDIR)/*~ *.o
+	rm -f $(ODIR)/*.o *~ $(INCDIR)/*~ *.o
 	rm -f LittleBro
 
 purge: clean

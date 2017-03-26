@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include "pid.h"
+#include <pid.h>
 
 enum {false, true};
 
@@ -15,7 +15,7 @@ struct PID {
 	double kMax, kMin;
 	double integral;
 	double setPoint;
-	double prevError;
+	double prevMeasure;
 	int hasClamp;
 
 };
@@ -30,11 +30,17 @@ PID_T PID_init() {
 	oPID->ki = 0;
 	oPID->kd = 0;
 	oPID->integral = 0;
-	oPID->prevError = 0;
+	oPID->prevMeasure = 0;
 	oPID->setPoint = 0;
 	oPID->hasClamp = false;
 
 	return oPID;
+}
+
+void PID_setpoint(PID_T pid, double setPoint) {
+	pid->setPoint = setPoint;
+	pid->prevMeasure = 0;
+	pid->integral = 0;
 }
 
 void PID_gains(PID_T pid, double kP, double kI, double kD) {
@@ -55,13 +61,14 @@ void PID_clear(PID_T pid) {
 	pid->ki = 0;
 }
 
-/* Each iteration, get output from error. */
-double PID_update(PID_T pid, double error) {
+/* Each iteration, get output from measurement. */
+double PID_update(PID_T pid, double measurement) {
 	double dVal, pidOut;
+	double error = pid->setPoint - measurement;
 	pid->integral += error;
 
-	dVal = error - pid->prevError;
-	pid->prevError = error;
+	dVal = measurement - pid->prevMeasure;
+	pid->prevMeasure = measurement;
 
 	pidOut = error * (pid->kp) + (pid->integral) * (pid->ki) + dVal * (pid->kd);
 
@@ -77,4 +84,3 @@ double PID_update(PID_T pid, double error) {
 void PID_free(PID_T pid) {
 	free(pid);
 }
-
