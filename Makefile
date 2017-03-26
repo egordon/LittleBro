@@ -11,7 +11,7 @@ _DEPS = angleControl.h pid.h motors.h sensor.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 # Add all C files here.
-_OBJ = LittleBro.o
+_OBJ = LittleBro.o pid.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 LIBS=-lm
@@ -21,12 +21,15 @@ $(ODIR)/%.o: %.c mesch
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 
+pid: $(ODIR)/pid.o
+	gcc -o $@ $^ $(CFLAGS) $(LIBS)
+
 LittleBro: $(OBJ) meschach.a
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
 meschach.a: mesch
 	$(MAKE) -C mesch
-	mv mesch/meschach.a .
+	cp mesch/meschach.a .
 
 mesch:
 	mkdir -p mesch
@@ -37,8 +40,9 @@ mesch:
 
 .PHONY: clean
 clean:
-	rm -f $(ODIR)/*.o *~ $(INCDIR)/*~
+	rm -f $(ODIR)/*.o *~ $(INCDIR)/*~ *.o
 	rm -f LittleBro
+	rm -f pid
 
 purge: clean
 	rm -f meschach.a
