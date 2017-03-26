@@ -20,10 +20,6 @@ $(ODIR)/%.o: %.c mesch
 	mkdir -p $(ODIR)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-
-pid: $(ODIR)/pid.o
-	gcc -o $@ $^ $(CFLAGS) $(LIBS)
-
 LittleBro: $(OBJ) meschach.a
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
@@ -38,12 +34,25 @@ mesch:
 	rm -f mesch12b.tar.gz
 
 
-.PHONY: clean
+.PHONY: clean purge upload
 clean:
-	rm -f $(ODIR)/*.o *~ $(INCDIR)/*~ *.o
+	rm -rf $(ODIR) *~ $(INCDIR)/*~ *.o
 	rm -f LittleBro
 	rm -f pid
 
 purge: clean
 	rm -f meschach.a
 	rm -rf mesch
+
+upload: clean
+	# Kill Previous Code
+	ssh pi 'killall LitleBro'
+	ssh pi 'rm -rf code'
+	# Upload New Code
+	#scp -r ./* pi:/home/pi/code
+	#ssh -t -t pi <<'ENDSSH'
+	#cd code
+	#rm -f meschach.a mesch/meschach.a
+	#make
+	#./LittleBro
+	#ENDSSH
