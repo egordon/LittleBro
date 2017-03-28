@@ -15,12 +15,10 @@ by each motor */
 double Motor_getLeft();
 double Motor_getRight();
 
-/* takes a value "left" which should range from -100 to 100, 
+/* takes a value "left" or "right" which should range from -100 to 100, 
 and is a percent of maximum power (negative is backwards) */
 int Motor_setLeft(double left);
 
-/* takes a value "right" which should range from -100 to 100, 
-and is a percent of maximum power (negative is backwards) */
 int Motor_setRight(double right);
 
 /* Utility Function, to input array */
