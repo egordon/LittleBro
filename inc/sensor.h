@@ -4,9 +4,9 @@
 /* Motor Dirver */
 
 /**
-  * Initialize Motors
+  * Initialize Sensors
   * Return 1 on Success.
-  * Return 0 on Failutr
+  * Return 0 on Failure
  **/
 int Sensor_init();
 
