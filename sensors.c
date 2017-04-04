@@ -1,4 +1,6 @@
 #include <math.h>
+#include <sensors.h>
+#include <pigpiod_if2.h>
 
 // const int SDA_A = 1000
 // const int SCL_A = 1000
@@ -6,7 +8,7 @@
 // const int SCL_B = 1000
 
 /* Some quick bus info
-0x6B gyro 
+0x6B gyro
 0x1E Magnetometer (if that's wrong, try 1f)
 0x29 Short distance
 0x52 Long distance
@@ -19,7 +21,7 @@ BUS 1 (Pi pins 3 SDA, 5 SCL)
 long, short, short
 */
 
-#define TWO_PI = (2*3.1415926536);
+#define TWO_PI (2*3.1415926536)
 
 const int GYRO_ADDR = 0x6B; // 7 bit 1101011;
 const int GYRO_BUS = 0; // check http://abyz.co.uk/rpi/pigpio/python.html#i2c_open
@@ -29,7 +31,7 @@ const int COMPASS_BUS = 0;
 // The datasheet gives 8.75mdps/digit for default sensitivity
 const double RPS_PER_DIGIT = 0.00875*360/TWO_PI;
 
-typedef enum {     
+enum {     
   GYRO_REGISTER_OUT_X_L             = 0x28,   //            r
   GYRO_REGISTER_OUT_X_H             = 0x29,   //            r
   GYRO_REGISTER_OUT_Y_L             = 0x2A,   //            r
@@ -50,46 +52,50 @@ typedef enum {
   COMPASS_REGISTER_OUT_Y_L_M     = 0x06,
   COMPASS_REGISTER_OUT_Z_H_M     = 0x07,
   COMPASS_REGISTER_OUT_Z_L_M     = 0x08,
+};
 
+static double compassOffset = 0;
 
+static int gyro_handle = 0;
+static int compass_handle = 0;
+
+static int pi;
+
+/* Local Functions */
+static double getCompassRaw(){
+  int16_t xRaw = i2c_read_word_data(pi, compass_handle, COMPASS_REGISTER_OUT_X_L_M);
+  int16_t yRaw = i2c_read_word_data(pi, compass_handle, COMPASS_REGISTER_OUT_Y_L_M);
+
+  double angle = atan2(yRaw, xRaw);
+  return angle;
 }
-
-double compassOffset = 0;
-
-int gyroHandle = 0;
 
 /**
   * Initialize Sensors
   * Return 1 on Success.
   * Return 0 on Failure
  **/
-int Sensor_init(){
+int Sensor_init(int pifd){
+  pi = pifd;
 	// TODO: change address of that one sensor
-	gyro_handle = i2c_open(GYRO_BUS, GYRO_ADDR);
+	gyro_handle = i2c_open(pi, GYRO_BUS, GYRO_ADDR, 0);
 	// acc_handle = i2c_open(ACC_BUS, ACC_ADDRESS);
-	compass_handle = i2c_open(COMPASS_BUS, COMPASS_ADDRESS);
+	compass_handle = i2c_open(pi, COMPASS_BUS, COMPASS_ADDR, 0);
 }
 
 /* Return angle in radians or radians/s. */
 
 double Sensor_getGyro(){
 	// TODO: Choose an axis by changing this letter:     V
-	int16_t raw = i2cReadWordData(gyroHandle, GYRO_REGISTER_OUT_X_L);
+	int16_t raw = i2c_read_word_data(pi, gyro_handle, GYRO_REGISTER_OUT_X_L);
 	// needs to be 16 bits signed so the signs work out correctly
 
 	return raw * RPS_PER_DIGIT;
 }
 
-double getCompassRaw(){
-	int16_t xRaw = i2cReadWordData(compassHandle, COMPASS_REGISTER_OUT_X_L_M);
-	int16_t yRaw = i2cReadWordData(compassHandle, COMPASS_REGISTER_OUT_Y_L_M);
-
-	double angle = atan2(yRaw, xRaw);
-	return angle;
-}
 double Sensor_getCompass(){
-	double raw = getCompassRaw;
-	return ((raw - compassOffset) + TWO_PI) % TWO_PI;
+	double raw = getCompassRaw();
+	return fmod(((raw - compassOffset) + TWO_PI), TWO_PI);
 }
 
 /* Calibrates Current angle as "0" */
@@ -97,19 +103,12 @@ void Sensor_calCompass(){
 	compassOffset = getCompassRaw();
 }
 
-/* Linear Stuff */
-typedef enum {
-	kFRONT,
-	kBACK,
-	kLEFT,
-	kRIGHT
-} Dir_t;
-
 /* Return distance in cm */
 double Sensor_getShort(Dir_t dir);
 double Sensor_getLong(Dir_t dir);
 
 /* Any Cleanup */
 void Sensor_free(){
-	i2c_close(gyro_handle);
+	i2c_close(pi, gyro_handle);
+  i2c_close(pi, compass_handle);
 }

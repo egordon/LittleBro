@@ -9,8 +9,7 @@ Date: 3/11/17
 #include <stdlib.h>
 #include <stdarg.h>
 #include <unistd.h>
-
-#include <pigpio.h>
+#include <angleControl.h>
 
 static double homeAngle = 0; /* desired angle */
 static VEC *angleState;

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <pigpio.h>
+#include <pigpiod_if2.h>
 
 //-------------------
 
@@ -18,20 +18,23 @@
 
 //-------------------
 
-double leftPercent = 0;
-double rightPercent = 0;
+static double leftPercent = 0;
+static double rightPercent = 0;
 
-int Motor_init() {
-	leftVoltage = 0;
-	rightVoltage = 0;
-	gpioWrite(LEFT_FORWARD, 0);
-	gpioWrite(LEFT_BACKWARD, 0);
-	gpioWrite(RIGHT_FORWARD, 0);
-	gpioWrite(RIGHT_BACKWARD, 0);
-	gpioWrite(LEFT_MOTOR_PIN, 0);
-	gpioWrite(RIGHT_MOTOR_PIN, 0);
-	gpioSetPWMrange(LEFT_MOTOR_PIN, MOTOR_RANGE);
-	gpioSetPWMrange(RIGHT_MOTOR_PIN, MOTOR_RANGE);
+static int pi;
+
+int Motor_init(int pifd) {
+	pi = pifd;
+	leftPercent = 0;
+	rightPercent = 0;
+	gpio_write(pi, LEFT_FORWARD, 0);
+	gpio_write(pi, LEFT_BACKWARD, 0);
+	gpio_write(pi, RIGHT_FORWARD, 0);
+	gpio_write(pi, RIGHT_BACKWARD, 0);
+	gpio_write(pi, LEFT_MOTOR_PIN, 0);
+	gpio_write(pi, RIGHT_MOTOR_PIN, 0);
+	set_PWM_range(pi, LEFT_MOTOR_PIN, MOTOR_RANGE);
+	set_PWM_range(pi, RIGHT_MOTOR_PIN, MOTOR_RANGE);
 	return 0;
 }
 
@@ -47,14 +50,14 @@ double Motor_getRight() {
 int Motor_setLeft(double left) {
 	leftPercent = left;
 	if (left >= 0) {
-		gpioWrite(LEFT_BACKWARD, 0);
-		gpioWrite(LEFT_FORWARD, 1);
-		gpioPWM(LEFT_MOTOR_PIN, (left * MOTOR_RANGE / 100.0));
+		gpio_write(pi, LEFT_BACKWARD, 0);
+		gpio_write(pi, LEFT_FORWARD, 1);
+		set_PWM_dutycycle(pi, LEFT_MOTOR_PIN, (left * MOTOR_RANGE / 100.0));
 	}
 	else {
-		gpioWrite(LEFT_FORWARD, 0);
-		gpioWrite(LEFT_BACKWARD, 1);
-		gpioPWM(LEFT_MOTOR_PIN, (left * MOTOR_RANGE / -100.0));
+		gpio_write(pi, LEFT_FORWARD, 0);
+		gpio_write(pi, LEFT_BACKWARD, 1);
+		set_PWM_dutycycle(pi, LEFT_MOTOR_PIN, (left * MOTOR_RANGE / -100.0));
 	}
 	return 0;
 }
@@ -62,14 +65,14 @@ int Motor_setLeft(double left) {
 int Motor_setRight(double right) {
 	rightPercent = right;
 	if (right >= 0) {
-		gpioWrite(RIGHT_BACKWARD, 0);
-		gpioWrite(RIGHT_FORWARD, 1);
-		gpioPWM(RIGHT_MOTOR_PIN, (right * MOTOR_RANGE / 100.0));
+		gpio_write(pi, RIGHT_BACKWARD, 0);
+		gpio_write(pi, RIGHT_FORWARD, 1);
+		set_PWM_dutycycle(pi, RIGHT_MOTOR_PIN, (right * MOTOR_RANGE / 100.0));
 	}
 	else {
-		gpioWrite(RIGHT_FORWARD, 0);
-		gpioWrite(RIGHT_BACKWARD, 1);
-		gpioPWM(RIGHT_MOTOR_PIN, (right * MOTOR_RANGE / -100.0));
+		gpio_write(pi, RIGHT_FORWARD, 0);
+		gpio_write(pi, RIGHT_BACKWARD, 1);
+		set_PWM_dutycycle(pi, RIGHT_MOTOR_PIN, (right * MOTOR_RANGE / -100.0));
 	}
 	return 0;
 }

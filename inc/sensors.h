@@ -8,7 +8,7 @@
   * Return 1 on Success.
   * Return 0 on Failure
  **/
-int Sensor_init();
+int Sensor_init(int pifd);
 
 /* Return angle in radians or radians/s. */
 double Sensor_getGyro();

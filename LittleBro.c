@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <motors.h>
-#include <pigpio.h>
+#include <pigpiod_if2.h>
 
 int main(int argc, char** argv) {
 	sleep(5);
@@ -11,7 +11,9 @@ int main(int argc, char** argv) {
 	x = v_get(10);
 	v_output(x);
 
-	Motor_init();
+	int pifd = pigpio_start(NULL, NULL);
+
+	Motor_init(pifd);
 	Motor_setLeft(50);
 	Motor_setRight(-50);
 
@@ -29,6 +31,8 @@ int main(int argc, char** argv) {
 
 	Motor_setLeft(0);
 	Motor_setRight(0);
+
+	pigpio_stop(pifd);
 
 	return EXIT_SUCCESS;
 }

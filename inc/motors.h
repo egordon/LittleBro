@@ -8,7 +8,7 @@
   * Return 0 on Success.
   * Return 1 on Failure
  **/
-int Motor_init();
+int Motor_init(int pifd);
 
 /* returns the percent of maximum power that is being used
 by each motor */
@@ -22,11 +22,7 @@ int Motor_setLeft(double left);
 int Motor_setRight(double right);
 
 /* Utility Function, to input array */
-int Motor_set(int* motors) {
-	int ret = Motor_setLeft(motors[0]);
-	ret &= Motor_setRight(motors[1]);
-	return ret;
-}
+int Motor_set(int* motors);
 
 /* Any Cleanup */
 void Motor_free();
