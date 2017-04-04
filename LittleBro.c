@@ -19,8 +19,8 @@ int main(int argc, char** argv) {
 
 	sleep(6);
 
-	Motor_setLeft(50);
-	Motor_setRight(-50);
+	Motor_setLeft(-50);
+	Motor_setRight(50);
 
 	sleep(6);
 

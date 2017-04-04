@@ -25,10 +25,10 @@ $(ODIR)/%.o: %.c mesch
 LittleBro: $(OBJ) meschach.a
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
-testkalman: $(ODIR)/testkalman.o meschach.a $(ODIR)/kalman.o
+testkalman.out: $(ODIR)/testkalman.o $(ODIR)/kalman.o meschach.a
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
-testpid: $(ODIR)/testpid.o $(ODIR)/pid.o
+testpid.out: $(ODIR)/testpid.o $(ODIR)/pid.o
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
 meschach.a: mesch
@@ -46,7 +46,7 @@ mesch:
 clean:
 	rm -f $(ODIR)/*.o *~ $(INCDIR)/*~ *.o
 	rm -f LittleBro
-	rm -f testpid
+	rm -f *.out
 
 purge: clean
 	rm -f meschach.a
