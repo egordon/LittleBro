@@ -1,6 +1,8 @@
 #ifndef ANGLE_CTRL_H
 #define ANGLE_CTRL_H
 
+typedef struct AngleState {} AngleState_T;
+
 int AC_init();
 
 /**
