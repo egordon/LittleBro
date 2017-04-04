@@ -25,6 +25,9 @@ $(ODIR)/%.o: %.c mesch
 LittleBro: $(OBJ) meschach.a
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
+testkalman: $(ODIR)/testkalman.o meschach.a $(ODIR)/kalman.o
+	gcc -o $@ $^ $(CFLAGS) $(LIBS)
+
 testpid: $(ODIR)/testpid.o $(ODIR)/pid.o
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 

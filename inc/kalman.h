@@ -16,7 +16,7 @@ typedef struct Kalman *Kalman_T;
 // observationModel (H) is identity matrix
 // initErrorCovariance should be zero matrix
 Kalman_T Kalman_init(MAT* stateTransModel, VEC* controlInputModel,
-	MAT* observationModel, MAT* initErrorCovariance, MAT* processNoiseCovariance,
+	MAT* observationModel, MAT* processNoiseCovariance,
 	MAT* observationNoiseCovariance);
 
 // update the Kalman filter by passing in a measurement and the voltage being passed to the motors
