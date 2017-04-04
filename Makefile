@@ -1,20 +1,20 @@
 IMESCH =./mesch
 IDIR = ./inc
 CC=gcc
-CFLAGS=-I$(IMESCH) -I$(IDIR)
+CFLAGS=-I$(IMESCH) -I$(IDIR) -pthread
 
 ODIR=obj
 LDIR =../lib
 
 # Add all custom header files here
-_DEPS = angleControl.h pid.h motors.h sensor.h
+_DEPS = angleControl.h pid.h motors.h sensors.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 # Add all C files here.
-_OBJ = LittleBro.o pid.o
+_OBJ = LittleBro.o pid.o motors.o sensors.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-LIBS=-lm
+LIBS=-lm -lpigpiod_if2 -lrt
 
 all: LittleBro
 
