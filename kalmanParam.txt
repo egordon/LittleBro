@@ -1,0 +1,14 @@
+Matrix: 2 by 2
+row 1: 1 0
+row 2: 0 1
+Vector: dim: 2
+1 1
+Matrix: 2 by 2
+row 1: 1 0
+row 2: 0 1
+Matrix: 2 by 2
+row 1: 1 0
+row 2: 0 1
+Matrix: 2 by 2
+row 1: 1 0
+row 2: 0 1

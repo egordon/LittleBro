@@ -81,6 +81,10 @@ double PID_update(PID_T pid, double measurement) {
 	return pidOut;
 }
 
+double PID_getSetpoint(PID_T pid) {
+	return pid->setPoint;
+}
+
 void PID_free(PID_T pid) {
 	free(pid);
 }

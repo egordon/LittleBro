@@ -128,7 +128,7 @@ void Kalman_update(Kalman_T kalman, VEC* measurement, double input, double delta
 }
 
 double Kalman_get(Kalman_T kalman) {
-	return v_get_val(kalman->stateEstimate, 1);
+	return v_get_val(kalman->stateEstimate, 0);
 }
 
 void Kalman_free(Kalman_T oKalman) {
