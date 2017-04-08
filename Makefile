@@ -7,11 +7,11 @@ ODIR=obj
 LDIR =../lib
 
 # Add all custom header files here
-_DEPS = angleControl.h pid.h motors.h sensors.h kalman.h
+_DEPS = angleControl.h pid.h motors.h sensors.h kalman.h control.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 # Add all C files here.
-_OBJ = LittleBro.o pid.o motors.o kalman.o angleControl.o sensors.o
+_OBJ = LittleBro.o pid.o motors.o kalman.o angleControl.o sensors.o control.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 LIBS=-lm -lpigpiod_if2 -lrt

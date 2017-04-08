@@ -14,6 +14,7 @@ Date: 3/11/17
 #include <kalman.h>
 #include <pid.h>
 
+// CHANGE THESE CONSTANTS PLEASE, ETHAN :)
 #define KALMANPARAMFILE "kalmanParam.txt"
 #define PID_KP 1
 #define PID_KI 1
@@ -32,7 +33,7 @@ AngleState_T AC_init() {
 	FILE *fp;
 	PID_T p;
 	Kalman_T k;
-	AngleState_T ac;
+	AngleState_T ac = (struct AngleState*) malloc(sizeof(struct AngleState));
 	MAT *F = m_get(2,2);
 	VEC *B = v_get(2);
 	MAT *H = m_get(2,2);
@@ -73,13 +74,14 @@ double AC_update(AngleState_T ac, double angle, double dAngle, double dt, double
 
 	Kalman_update(ac->stateEstimator, measurement, inputDiff, dt);
 	currentAngle = Kalman_get(ac->stateEstimator);
-	return PID_update(ac->pid, PID_getSetpoint(ac->pid) - currentAngle);
+	return PID_update(ac->pid, PID_getSetpoint(ac->pid) - currentAngle); // should probably be multiplied by some constant first?
+	// current code is not at all tailored to realistic outputs of the PID loop
 }
 
-void AC_change(AngleState_T ac, double newHome) {
+void AC_changeHome(AngleState_T ac, double newHome) {
 	PID_setpoint(ac->pid, newHome);
 }
 
-void AC_free() {
+void AC_free(AngleState_T ac) {
 
 }

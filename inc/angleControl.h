@@ -13,8 +13,8 @@ AngleState_T AC_init();
   **/
 double AC_update(AngleState_T ac, double angle, double dAngle, double dt, double inputDiff);
 
-void AC_change(AngleState_T ac, double newHome);
+void AC_changeHome(AngleState_T ac, double newHome);
 
-void AC_free();
+void AC_free(AngleState_T ac);
 
 #endif
