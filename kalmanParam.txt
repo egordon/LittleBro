@@ -2,13 +2,13 @@ Matrix: 2 by 2
 row 1: 1 0.1
 row 2: 0 1
 Vector: dim: 2
-0 1
+0 3.944
 Matrix: 2 by 2
 row 1: 1 0
 row 2: 0 1
 Matrix: 2 by 2
-row 1: 1 0
-row 2: 0 1
+row 1: 0.01 0
+row 2: 0 .2
 Matrix: 2 by 2
-row 1: 1 0
-row 2: 0 1
+row 1: .05 0
+row 2: 0 .2
