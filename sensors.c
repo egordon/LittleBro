@@ -1,6 +1,7 @@
 #include <math.h>
 #include <sensors.h>
 #include <pigpiod_if2.h>
+#include <adafruit_distance.h>
 
 // const int SDA_A = 1000
 // const int SCL_A = 1000
@@ -23,10 +24,21 @@ long, short, short
 
 #define TWO_PI (2*3.1415926536)
 
+const int BUS = 0;
 const int GYRO_ADDR = 0x6B; // 7 bit 1101011;
 const int GYRO_BUS = 0; // check http://abyz.co.uk/rpi/pigpio/python.html#i2c_open
 const int COMPASS_ADDR = 0x1E; // if it's wrong, try 1F
-const int COMPASS_BUS = 0; 
+const int COMPASS_BUS = 0;
+const int SHORT_ADDR_A = -1; // The original address
+const int SHORT_ADDR_B = -1;
+const int SHORT_ADDR_C = -1;
+const int LONG_ADDR_A = -1;  // The original address
+const int LONG_ADDR_B = -1;
+
+const int SHORT_SHUTDOWN_A = -1;
+const int SHORT_SHUTDOWN_B = -1;
+const int LONG_SHUTDOWN_A = -1;
+
 
 // The datasheet gives 8.75mdps/digit for default sensitivity
 const double RPS_PER_DIGIT = 0.00875*360/TWO_PI;
@@ -58,6 +70,11 @@ static double compassOffset = 0;
 
 static int gyro_handle = 0;
 static int compass_handle = 0;
+static int short_A_handle = 0;
+static int short_B_handle = 0;
+static int short_C_handle = 0;
+static int long_A_handle = 0;
+static int long_B_handle = 0;
 
 static int pi;
 
@@ -77,16 +94,34 @@ static double getCompassRaw(){
  **/
 int Sensor_init(int pifd){
   pi = pifd;
-	// TODO: change address of that one sensor
-	gyro_handle = i2c_open(pi, GYRO_BUS, GYRO_ADDR, 0);
-	// acc_handle = i2c_open(ACC_BUS, ACC_ADDRESS);
-	compass_handle = i2c_open(pi, COMPASS_BUS, COMPASS_ADDR, 0);
+  adafruit_distance_set_pi_handle(pi);
+  
+  short_A_handle = i2c_open(pi, BUS, SHORT_ADDR_A, 0);
+  short_B_handle = i2c_open(pi, BUS, SHORT_ADDR_B, 0);
+  short_C_handle = i2c_open(pi, BUS, SHORT_ADDR_C, 0);
+  
+  // change address of short range
+  gpioWrite(pi, SHORT_SHUTDOWN_A, 1); // TODO is 1 alive or dead?
+  gpioWrite(SHORT_SHUTDOWN_B, 1);
+  adafruit_distance_begin(short_A_handle);
+  adafruit_distance_change_address(short_A_handle, SHORT_ADDR_C);
+  
+  gpioWrite(SHORT_SHUTDOWN_B, 0);
+  adafruit_distance_begin(short_A_handle);
+  adafruit_distance_change_address(short_A_handle, SHORT_ADDR_B);
+  
+  gpioWrite(SHORT_SHUTDOWN_A, 0);
+  adafruit_distance_begin(short_A_handle);
+  
+  gyro_handle = i2c_open(pi, GYRO_BUS, GYRO_ADDR, 0);
+  // acc_handle = i2c_open(ACC_BUS, ACC_ADDRESS);
+  compass_handle = i2c_open(pi, COMPASS_BUS, COMPASS_ADDR, 0);
 }
 
 /* Return angle in radians or radians/s. */
 
 double Sensor_getGyro(){
-	// TODO: Choose an axis by changing this letter:     V
+	// TODO: Choose an axis by changing this letter:                    V
 	int16_t raw = i2c_read_word_data(pi, gyro_handle, GYRO_REGISTER_OUT_X_L);
 	// needs to be 16 bits signed so the signs work out correctly
 
@@ -100,6 +135,7 @@ double Sensor_getCompass(){
 
 /* Calibrates Current angle as "0" */
 void Sensor_calCompass(){
+        // TODO: consider averaging over multiple readings
 	compassOffset = getCompassRaw();
 }
 
@@ -109,6 +145,11 @@ double Sensor_getLong(Dir_t dir);
 
 /* Any Cleanup */
 void Sensor_free(){
-	i2c_close(pi, gyro_handle);
+  i2c_close(pi, gyro_handle);
   i2c_close(pi, compass_handle);
+
+  // TODO: not sure whether it's a good idea to reset addresses before shutting down
+  i2c_close(pi, short_A_handle);
+  i2c_close(pi, short_B_handle);
+  i2c_close(pi, short_B_handle);
 }
