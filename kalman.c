@@ -73,6 +73,8 @@ void Kalman_update(Kalman_T kalman, VEC* measurement, double input, double delta
 
 	m_ident(identityM); // set identityM to be an identity matrix
 
+	m_set_val(kalman->stateTransM, 0, 1, deltaT); // Change F to reflect deltaT
+
 	// Predicted (a priori) state estimate  [aPrioriEstimate]
 	mv_mlt(kalman->stateTransM, kalman->stateEstimate, pivotV1); // pivotV1 = stateTransM * stateEstimate
 	sv_mlt(deltaT, pivotV1, pivotV2); // pivotV2 = pivotV1 * deltaT

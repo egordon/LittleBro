@@ -5,7 +5,7 @@
 
 typedef struct Control *Control_T;
 
-Control_T Control_init();
+Control_T Control_init(int pifd);
 
 // updates the AngleState object inside of oControl, by reading the gyro and compass
 // then using the AC_update() function from angleControl.c

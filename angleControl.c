@@ -16,11 +16,11 @@ Date: 3/11/17
 
 // CHANGE THESE CONSTANTS PLEASE, ETHAN :)
 #define KALMANPARAMFILE "kalmanParam.txt"
-#define PID_KP 1
-#define PID_KI 1
-#define PID_KD 1
-#define PID_CLAMPMIN -100
-#define PID_CLAMPMAX 100
+#define PID_KP 63.6 // 400 "Volts" range / 2 PI radians range
+#define PID_KI 0
+#define PID_KD 0
+#define PID_CLAMPMIN -200
+#define PID_CLAMPMAX 200
 
 struct AngleState {
 
