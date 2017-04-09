@@ -20,17 +20,17 @@ int main(int argc, char** argv) {
 	Motor_setLeft(50);
 	Motor_setRight(-50);
 
-	gpioSleep(0, 3, 0);
+	time_sleep(3.0);
 
 	Motor_setLeft(-50);
 	Motor_setRight(50);
 
-	gpioSleep(0, 3, 0);
+	time_sleep(3.0);
 
 	Motor_setLeft(50);
 	Motor_setRight(50);
 
-	gpioSleep(0, 3, 0);
+	time_sleep(3.0);
 
 	Motor_setLeft(0);
 	Motor_setRight(0);
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 	while(1) {
 		i++;
 		printf("Reading #%d, Gyro: %f, Compass: %f", i, Sensor_getGyro(), Sensor_getCompass());
-		gpioSleep(0, 0, 500000);
+		time_sleep(0.5);
 	}
 
 	pigpio_stop(pifd);

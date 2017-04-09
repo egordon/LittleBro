@@ -42,9 +42,12 @@ Control_T Control_init(int pifd) {
 void Control_updateAngle(Control_T oControl) {
 	double angle, dAngle, dt, inputDiff;
 	int secs, microSecs;
-	
+
+	// Hi Changyan! I found this bug but I don't want to fix it because I don't quite understand everything you are doing
+	// Anyway, use time_time() instead of gpioTime(int,*int,*int), which just returns a double with the current time in it
+	// It should actually make things easier since you only need to store one prevSeconds now (which is a double) instead of separate seconds and microseconds
 	gpioTime(0, &secs, &microSecs);
-	dt = (secs - oControl->prevSeconds) + (microSecs - oControl->prevMicroseconds)/1000000;
+	dt = (secs - oControl->prevSeconds) + (microSecs - oControl->prevMicroseconds)/1000000.0;
 
 	angle = Sensor_getCompass();
 	dAngle = Sensor_getGyro();
