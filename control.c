@@ -7,6 +7,7 @@
 #include <angleControl.h>
 #include <motors.h>
 #include <sensors.h>
+#include <control.h>
 
 // CHANGE THESE CONSTANTS PLEASE, ETHAN!
 #define ANGLECOEFF 1
@@ -30,7 +31,7 @@ Control_T Control_init(int pifd) {
 	Motor_init(pifd);
 
 	returnVal->ac = ac;
-	returnVal->output = 0;
+	returnVal->angleOutputDiff = 0;
 	return returnVal;
 }
 
@@ -39,10 +40,10 @@ void Control_updateAngle(Control_T oControl) {
 	angle = Sensor_getCompass();
 	dAngle = Sensor_getGyro();
 	dt = DT; // TEMPORARY, IS BAD
-	inputDiff = Control_getRightOutput() - Control_getLeftOutput();
-	oControl->angleOutputDiff = AC_update(oControl->ac, double angle, double dAngle, double dt, double inputDiff);
-	Motor_setRight(Control_getRightOutput());
-	Motor_setLeft(Control_getLeftOutput());
+	inputDiff = Control_getRightOutput(oControl) - Control_getLeftOutput(oControl);
+	oControl->angleOutputDiff = AC_update(oControl->ac, angle, dAngle, dt, inputDiff);
+	Motor_setRight(Control_getRightOutput(oControl));
+	Motor_setLeft(Control_getLeftOutput(oControl));
 }
 
 double Control_getRightOutput(Control_T oControl) {

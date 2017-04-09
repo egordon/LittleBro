@@ -1,7 +1,7 @@
 IMESCH =./mesch
 IDIR = ./inc
 CC=gcc
-CFLAGS=-I$(IMESCH) -I$(IDIR) -pthread
+CFLAGS=-I$(IMESCH) -I$(IDIR) -I../PIGPIO -pthread
 
 ODIR=obj
 LDIR =../lib
