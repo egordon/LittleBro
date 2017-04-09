@@ -23,16 +23,18 @@ struct Kalman {
 };
 
 Kalman_T Kalman_init(MAT* stateTransModel, VEC* controlInputModel,
-	MAT* observationModel, MAT* initErrorCovariance, MAT* processNoiseCovariance,
+	MAT* observationModel, MAT* processNoiseCovariance,
 	MAT* observationNoiseCovariance) {
 	Kalman_T oKalman;
+	MAT *initErrorCovariance = m_get(2,2);
 
 	assert((stateTransModel->m == 2)&&(stateTransModel->n == 2));
 	assert((observationModel->m == 2)&&(observationModel->n == 2));
-	assert((initErrorCovariance->m == 2)&&(initErrorCovariance->n == 2));
 	assert((processNoiseCovariance->m == 2)&&(processNoiseCovariance->n == 2));
 	assert((observationNoiseCovariance->m == 2)&&(observationNoiseCovariance->n == 2));
 	assert(controlInputModel->dim == 2);
+
+	m_zero(initErrorCovariance);
 
 	oKalman = (struct Kalman*) malloc(sizeof(struct Kalman));
 	if (oKalman == NULL) return NULL;
@@ -70,6 +72,8 @@ void Kalman_update(Kalman_T kalman, VEC* measurement, double input, double delta
 	assert(measurement->dim == 2);
 
 	m_ident(identityM); // set identityM to be an identity matrix
+
+	m_set_val(kalman->stateTransM, 0, 1, deltaT); // Change F to reflect deltaT
 
 	// Predicted (a priori) state estimate  [aPrioriEstimate]
 	mv_mlt(kalman->stateTransM, kalman->stateEstimate, pivotV1); // pivotV1 = stateTransM * stateEstimate
@@ -110,8 +114,6 @@ void Kalman_update(Kalman_T kalman, VEC* measurement, double input, double delta
 	m_add(pivotM2, identityM, pivotM3);
 	m_mlt(pivotM3, aPrioriCov, kalman->errorCov);
 
-	// don't forget to update your x_k,k and your P_k,k
-
 	V_FREE(aPrioriEstimate);
 	M_FREE(aPrioriCov);
 	V_FREE(measureResidual);
@@ -128,7 +130,7 @@ void Kalman_update(Kalman_T kalman, VEC* measurement, double input, double delta
 }
 
 double Kalman_get(Kalman_T kalman) {
-	return v_get_val(kalman->stateEstimate, 1);
+	return v_get_val(kalman->stateEstimate, 0);
 }
 
 void Kalman_free(Kalman_T oKalman) {

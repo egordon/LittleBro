@@ -42,4 +42,4 @@ obj/*
 LittleBro
 
 # Other binaries
-pid
+*.out

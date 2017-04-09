@@ -1,17 +1,17 @@
 IMESCH =./mesch
 IDIR = ./inc
 CC=gcc
-CFLAGS=-I$(IMESCH) -I$(IDIR) -pthread
+CFLAGS=-I$(IMESCH) -I$(IDIR) -I../PIGPIO -pthread
 
 ODIR=obj
 LDIR =../lib
 
 # Add all custom header files here
-_DEPS = angleControl.h pid.h motors.h sensors.h kalman.h adafruit_distance.h
+_DEPS = angleControl.h pid.h motors.h sensors.h kalman.h control.h adafruit_distance.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 # Add all C files here.
-_OBJ = LittleBro.o pid.o motors.o kalman.o angleControl.o sensors.o adafruit_distance.o
+_OBJ = LittleBro.o pid.o motors.o kalman.o angleControl.o sensors.o control.o adafruit_distance.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 LIBS=-lm -lpigpiod_if2 -lrt
@@ -25,7 +25,10 @@ $(ODIR)/%.o: %.c mesch
 LittleBro: $(OBJ) meschach.a
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
-testpid: $(ODIR)/testpid.o $(ODIR)/pid.o
+testkalman.out: $(ODIR)/testkalman.o $(ODIR)/kalman.o meschach.a
+	gcc -o $@ $^ $(CFLAGS) $(LIBS)
+
+testpid.out: $(ODIR)/testpid.o $(ODIR)/pid.o
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
 meschach.a: mesch
@@ -43,7 +46,7 @@ mesch:
 clean:
 	rm -f $(ODIR)/*.o *~ $(INCDIR)/*~ *.o
 	rm -f LittleBro
-	rm -f testpid
+	rm -f *.out
 
 purge: clean
 	rm -f meschach.a
