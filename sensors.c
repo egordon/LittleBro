@@ -101,16 +101,16 @@ int Sensor_init(int pifd){
   short_C_handle = i2c_open(pi, BUS, SHORT_ADDR_C, 0);
   
   // change address of short range
-  gpioWrite(pi, SHORT_SHUTDOWN_A, 1); // TODO is 1 alive or dead?
-  gpioWrite(SHORT_SHUTDOWN_B, 1);
+  gpio_write(pi, SHORT_SHUTDOWN_A, 1); // TODO is 1 alive or dead?
+  gpio_write(pi, SHORT_SHUTDOWN_B, 1);
   adafruit_distance_begin(short_A_handle);
   adafruit_distance_change_address(short_A_handle, SHORT_ADDR_C);
   
-  gpioWrite(SHORT_SHUTDOWN_B, 0);
+  gpio_write(pi, SHORT_SHUTDOWN_B, 0);
   adafruit_distance_begin(short_A_handle);
   adafruit_distance_change_address(short_A_handle, SHORT_ADDR_B);
   
-  gpioWrite(SHORT_SHUTDOWN_A, 0);
+  gpio_write(pi, SHORT_SHUTDOWN_A, 0);
   adafruit_distance_begin(short_A_handle);
   
   gyro_handle = i2c_open(pi, GYRO_BUS, GYRO_ADDR, 0);
