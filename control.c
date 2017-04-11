@@ -20,7 +20,6 @@ struct Control {
 	int prevSeconds;
 	// seconds elapsed since pigpio was initialized
 	// as measured during the most recent Control_updateAngle() call
-	int prevMicroseconds;
 	AngleState_T ac;
 	double angleOutputDiff;
 	// eventually add things like:
@@ -34,6 +33,7 @@ Control_T Control_init(int pifd) {
 	AngleState_T ac = AC_init();
 	Motor_init(pifd);
 
+	returnVal->prevSeconds = time_time();
 	returnVal->ac = ac;
 	returnVal->angleOutputDiff = 0;
 	return returnVal;
@@ -41,14 +41,15 @@ Control_T Control_init(int pifd) {
 
 void Control_updateAngle(Control_T oControl) {
 	double angle, dAngle, dt, inputDiff;
-	int secs, microSecs;
+	double secs;
 
 	// Hi Changyan! I found this bug but I don't want to fix it because I don't quite understand everything you are doing
 	// Anyway, use time_time() instead of gpioTime(int,*int,*int), which just returns a double with the current time in it
 	// It should actually make things easier since you only need to store one prevSeconds now (which is a double) instead of separate seconds and microseconds
-	gpioTime(0, &secs, &microSecs);
-	dt = (secs - oControl->prevSeconds) + (microSecs - oControl->prevMicroseconds)/1000000.0;
+	secs = time_time();
+	dt = secs - oControl->prevSeconds;
 
+	oControl->prevSeconds = secs;
 	angle = Sensor_getCompass();
 	dAngle = Sensor_getGyro();
 	inputDiff = Control_getRightOutput(oControl) - Control_getLeftOutput(oControl);

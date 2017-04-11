@@ -10,10 +10,10 @@
 
 #define LEFT_MOTOR_PIN 12 // PWM channel 0
 #define RIGHT_MOTOR_PIN 13 // PWM channel 1
-#define LEFT_FORWARD 17
-#define LEFT_BACKWARD 27
-#define RIGHT_FORWARD 23
-#define	RIGHT_BACKWARD 24
+#define LEFT_FORWARD 16
+#define LEFT_BACKWARD 25
+#define RIGHT_FORWARD 6
+#define	RIGHT_BACKWARD 5
 #define MOTOR_RANGE 255
 
 //-------------------

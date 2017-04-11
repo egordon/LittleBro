@@ -9,35 +9,34 @@
 
 int main(int argc, char** argv) {
 	int i = 0;
-	sleep(5);
-	VEC *x;
-	x = v_get(10);
-	v_output(x);
+	//sleep(5);
 
 	int pifd = pigpio_start(NULL, NULL);
-
+	
+	printf("test 1\n");
 	Motor_init(pifd);
 	Motor_setLeft(50);
 	Motor_setRight(-50);
 
 	time_sleep(3.0);
 
-	Motor_setLeft(-50);
-	Motor_setRight(50);
+	printf("test2\n");
+	Motor_setLeft(-75);
+	Motor_setRight(25);
 
 	time_sleep(3.0);
 
-	Motor_setLeft(50);
-	Motor_setRight(50);
+	Motor_setLeft(75);
+	Motor_setRight(75);
 
-	time_sleep(3.0);
+	time_sleep(6.0);
 
 	Motor_setLeft(0);
 	Motor_setRight(0);
 
 	while(1) {
 		i++;
-		printf("Reading #%d, Gyro: %f, Compass: %f", i, Sensor_getGyro(), Sensor_getCompass());
+		printf("Reading #%d, Gyro: %f, Compass: %f\n", i, Sensor_getGyro(), Sensor_getCompass());
 		time_sleep(0.5);
 	}
 

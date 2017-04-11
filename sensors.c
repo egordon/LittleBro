@@ -116,6 +116,7 @@ int Sensor_init(int pifd){
   gyro_handle = i2c_open(pi, GYRO_BUS, GYRO_ADDR, 0);
   // acc_handle = i2c_open(ACC_BUS, ACC_ADDRESS);
   compass_handle = i2c_open(pi, COMPASS_BUS, COMPASS_ADDR, 0);
+  return 1; //success
 }
 
 /* Return angle in radians or radians/s. */

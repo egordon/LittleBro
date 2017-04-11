@@ -55,7 +55,7 @@ purge: clean
 
 upload: clean
 	# Kill Previous Code
-	ssh pi 'killall LitleBro || true'
+	ssh pi 'killall LittleBro || true'
 	ssh pi 'cd code; make clean'
 	# Upload New Code
 	scp -r ./*.c pi:/home/pi/code
