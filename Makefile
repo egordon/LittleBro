@@ -31,6 +31,9 @@ testkalman.out: $(ODIR)/testkalman.o $(ODIR)/kalman.o meschach.a
 testpid.out: $(ODIR)/testpid.o $(ODIR)/pid.o
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
+testi2c.out: $(ODIR)/testi2c.o
+	gcc -o $@ $^ $(CFLAGS) $(LIBS)
+
 meschach.a: mesch
 	$(MAKE) -C mesch
 	cp mesch/meschach.a .
