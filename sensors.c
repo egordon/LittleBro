@@ -2,6 +2,7 @@
 #include <sensors.h>
 #include <pigpiod_if2.h>
 #include <adafruit_distance.h>
+#include <stdio.h>
 
 // const int SDA_A = 1000
 // const int SCL_A = 1000
@@ -84,7 +85,8 @@ static double getCompassRaw(){
   int16_t yRaw = i2c_read_word_data(pi, compass_handle, COMPASS_REGISTER_OUT_Y_L_M);
 
   double angle = atan2(yRaw, xRaw);
-  return angle;
+  printf("yRaw: %d", yRaw);
+  return xRaw;
 }
 
 /**
@@ -96,7 +98,7 @@ int Sensor_init(int pifd){
   pi = pifd;
   adafruit_distance_set_pi_handle(pi);
   
-  short_A_handle = i2c_open(pi, BUS, SHORT_ADDR_A, 0);
+  /*short_A_handle = i2c_open(pi, BUS, SHORT_ADDR_A, 0);
   short_B_handle = i2c_open(pi, BUS, SHORT_ADDR_B, 0);
   short_C_handle = i2c_open(pi, BUS, SHORT_ADDR_C, 0);
   
@@ -111,11 +113,12 @@ int Sensor_init(int pifd){
   adafruit_distance_change_address(short_A_handle, SHORT_ADDR_B);
   
   gpio_write(pi, SHORT_SHUTDOWN_A, 0);
-  adafruit_distance_begin(short_A_handle);
+  adafruit_distance_begin(short_A_handle);*/
   
   gyro_handle = i2c_open(pi, GYRO_BUS, GYRO_ADDR, 0);
-  // acc_handle = i2c_open(ACC_BUS, ACC_ADDRESS);
-  compass_handle = i2c_open(pi, COMPASS_BUS, COMPASS_ADDR, 0);
+  //acc_handle = i2c_open(ACC_BUS, ACC_ADDRESS);
+  //compass_handle = i2c_open(pi, COMPASS_BUS, COMPASS_ADDR, 0);
+  //Sensors_calCompass();
   return 1; //success
 }
 
@@ -124,6 +127,7 @@ int Sensor_init(int pifd){
 double Sensor_getGyro(){
 	// TODO: Choose an axis by changing this letter:                    V
 	int16_t raw = i2c_read_word_data(pi, gyro_handle, GYRO_REGISTER_OUT_X_L);
+  printf("raw is %d\n", raw);
 	// needs to be 16 bits signed so the signs work out correctly
 
 	return raw * RPS_PER_DIGIT;

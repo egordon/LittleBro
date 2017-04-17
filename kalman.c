@@ -8,6 +8,8 @@
 #include <assert.h>
 #include <matrix2.h>
 
+#define TWO_PI (2*3.1415926536)
+
 //------------------
 
 struct Kalman {
@@ -54,6 +56,11 @@ Kalman_T Kalman_init(MAT* stateTransModel, VEC* controlInputModel,
 // update the Kalman filter by passing in a measurement and the voltage being passed to the motors
 // may need to change input to a vec if very non-linear relationship between motor voltage and speed
 // currently, we assume input is the difference between the right/left motor voltage
+
+// Note from Changyan: in order to account for the fact that angles range from 0 to TWO_PI, I have "modded"
+// the angle values in aPrioriEstimate and measureResidual below. These may or may not be all the things
+// that need to be modded. measurement does not need to be modded because it will be already modded
+// in the sensors.c function when read from Gyro/Compass
 void Kalman_update(Kalman_T kalman, VEC* measurement, double input, double deltaT) {
 	VEC *aPrioriEstimate = v_get(2);
 	MAT *aPrioriCov = m_get(2, 2);
@@ -68,6 +75,7 @@ void Kalman_update(Kalman_T kalman, VEC* measurement, double input, double delta
 	VEC *pivotV1 = v_get(2);
 	VEC *pivotV2 = v_get(2);
 	VEC *pivotV3 = v_get(2);
+	double modPivot;
 
 	assert(measurement->dim == 2);
 
@@ -80,6 +88,14 @@ void Kalman_update(Kalman_T kalman, VEC* measurement, double input, double delta
 	sv_mlt(deltaT, pivotV1, pivotV2); // pivotV2 = pivotV1 * deltaT
 	sv_mlt(input, kalman->controlInputM, pivotV3); // pivotV3 = input * controlInputM
 	v_add(pivotV2, pivotV3, aPrioriEstimate); // aPrioriEstimate = pivotV2 + pivotV3
+	modPivot = v_get_val(aPrioriEstimate, 0);
+	while (modPivot < 0) {
+		modPivot += TWO_PI;
+	}
+	while (modPivot >= TWO_PI) {
+		modPivot -= TWO_PI;
+	}
+	v_set_val(aPrioriEstimate, 0, modPivot);
 
 	// Predicted (a priori) estimate covariance  [aPrioriCov]
 	// aPrioriCov = (F_k)(P_k-1,k-1)(F_k^t) + Q_k
@@ -91,6 +107,14 @@ void Kalman_update(Kalman_T kalman, VEC* measurement, double input, double delta
 	// Innovation or measurement residual  [measureResidual]
 	mv_mlt(kalman->observationM, aPrioriEstimate, pivotV1);
 	v_add(pivotV1, measurement, measureResidual);
+	modPivot = v_get_val(measureResidual, 0);
+	while (modPivot < 0) {
+		modPivot += TWO_PI;
+	}
+	while (modPivot >= TWO_PI) {
+		modPivot -= TWO_PI;
+	}
+	v_set_val(measureResidual, 0, modPivot);
 
 	// Innovation (or residual) covariance [residualCov]
 	m_mlt(kalman->observationM, aPrioriCov, pivotM1);

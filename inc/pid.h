@@ -3,7 +3,9 @@
 
 typedef struct PID *PID_T;
 
-PID_T PID_init();
+// angleOrNot is true if this PID loop is controlling angle measurements
+// ranging from 0 to TWO_PI, and angleOrNot is false otherwise
+PID_T PID_init(int angleOrNot);
 
 void PID_setpoint(PID_T pid, double setPoint);
 

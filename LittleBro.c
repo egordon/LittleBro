@@ -12,6 +12,7 @@ int main(int argc, char** argv) {
 	//sleep(5);
 
 	int pifd = pigpio_start(NULL, NULL);
+	Sensor_init(pifd);
 	
 	printf("test 1\n");
 	Motor_init(pifd);
@@ -21,13 +22,13 @@ int main(int argc, char** argv) {
 	time_sleep(3.0);
 
 	printf("test2\n");
-	Motor_setLeft(-75);
+	Motor_setLeft(-25);
 	Motor_setRight(25);
 
 	time_sleep(3.0);
 
-	Motor_setLeft(75);
-	Motor_setRight(75);
+	Motor_setLeft(10);
+	Motor_setRight(10);
 
 	time_sleep(6.0);
 
@@ -36,7 +37,7 @@ int main(int argc, char** argv) {
 
 	while(1) {
 		i++;
-		printf("Reading #%d, Gyro: %f, Compass: %f\n", i, Sensor_getGyro(), Sensor_getCompass());
+		printf("Reading #%d, Gyro: %f, Compass: \n", i, Sensor_getGyro());
 		time_sleep(0.5);
 	}
 

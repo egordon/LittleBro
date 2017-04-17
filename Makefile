@@ -28,10 +28,10 @@ LittleBro: $(OBJ) meschach.a
 testkalman.out: $(ODIR)/testkalman.o $(ODIR)/kalman.o meschach.a
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
-testpid.out: $(ODIR)/testpid.o $(ODIR)/pid.o
+testi2c.out: $(ODIR)/testi2c.o
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
-testi2c.out: $(ODIR)/testi2c.o
+testpid.out: $(ODIR)/testpid.o $(ODIR)/pid.o
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
 meschach.a: mesch

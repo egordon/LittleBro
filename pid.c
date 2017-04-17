@@ -5,6 +5,8 @@
 #include <stdarg.h>
 #include <pid.h>
 
+#define TWO_PI (2*3.1415926536)
+
 enum {false, true};
 
 //----------------------------
@@ -17,10 +19,11 @@ struct PID {
 	double setPoint;
 	double prevMeasure;
 	int hasClamp;
+	int isAngle; // 0 if this is normal PID, 1 if this is referring to angle
 
 };
 
-PID_T PID_init() {
+PID_T PID_init(int angleOrNot) {
 	PID_T oPID;
 
 	oPID = (struct PID*) malloc(sizeof(struct PID));
@@ -33,6 +36,7 @@ PID_T PID_init() {
 	oPID->prevMeasure = 0;
 	oPID->setPoint = 0;
 	oPID->hasClamp = false;
+	oPID->isAngle = angleOrNot;
 
 	return oPID;
 }
@@ -64,7 +68,20 @@ void PID_clear(PID_T pid) {
 /* Each iteration, get output from measurement. */
 double PID_update(PID_T pid, double measurement) {
 	double dVal, pidOut;
-	double error = pid->setPoint - measurement;
+	double absError = pid->setPoint - measurement;
+	double error;
+
+	// this accounts for the case where the PID is controlling angle
+	if (pid->isAngle == false) {
+		error = absError;
+	} else {
+		if (absError < (TWO_PI/2)) {
+			error = absError;
+		} else {
+			error = absError - TWO_PI;
+		}
+	}
+
 	pid->integral += error;
 
 	dVal = measurement - pid->prevMeasure;

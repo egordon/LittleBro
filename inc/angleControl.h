@@ -11,9 +11,13 @@ AngleState_T AC_init();
   * @param dt: Time difference from last update.
 
   **/
+
+// returns the motor difference that should be sent to motors
 double AC_update(AngleState_T ac, double angle, double dAngle, double dt, double inputDiff);
 
 void AC_changeHome(AngleState_T ac, double newHome);
+
+double AC_getAngle(AngleState_T ac);
 
 void AC_free(AngleState_T ac);
 

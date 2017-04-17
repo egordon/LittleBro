@@ -14,6 +14,8 @@ Date: 3/11/17
 #include <kalman.h>
 #include <pid.h>
 
+enum {false, true};
+
 // CHANGE THESE CONSTANTS PLEASE, ETHAN :)
 #define KALMANPARAMFILE "kalmanParam.txt"
 #define PID_KP 63.6 // 400 "Volts" range / 2 PI radians range
@@ -49,7 +51,7 @@ AngleState_T AC_init() {
 	m_finput(fp, R);
 	k = Kalman_init(F, B, H, Q, R);
 
-	p = PID_init();
+	p = PID_init(true);
 	PID_setpoint(p, 0);
 	PID_gains(p, PID_KP, PID_KI, PID_KD);
 	PID_clamp(p, PID_CLAMPMIN, PID_CLAMPMAX);
@@ -74,12 +76,16 @@ double AC_update(AngleState_T ac, double angle, double dAngle, double dt, double
 
 	Kalman_update(ac->stateEstimator, measurement, inputDiff, dt);
 	currentAngle = Kalman_get(ac->stateEstimator);
-	return PID_update(ac->pid, PID_getSetpoint(ac->pid) - currentAngle); // should probably be multiplied by some constant first?
-	// current code is not at all tailored to realistic outputs of the PID loop
+	return PID_update(ac->pid, PID_getSetpoint(ac->pid) - currentAngle);
+	// may need to be multiplied by a constant
 }
 
 void AC_changeHome(AngleState_T ac, double newHome) {
 	PID_setpoint(ac->pid, newHome);
+}
+
+double AC_getAngle(AngleState_T ac) {
+	return Kalman_get(ac->stateEstimator);
 }
 
 void AC_free(AngleState_T ac) {

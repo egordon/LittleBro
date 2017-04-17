@@ -11,9 +11,14 @@
 #include <pigpiod_if2.h>
 
 // CHANGE THESE CONSTANTS PLEASE, ETHAN!
-#define ANGLECOEFF 0.20
+#define ANGLECOEFF 0.10
 #define WALLCOEFF 0.30
 #define GRIDCOEFF 0.50
+
+#define PI (3.1415926536)
+
+static double rightOutput = 0;
+static double leftOutput = 0;
 
 struct Control {
 
@@ -36,34 +41,73 @@ Control_T Control_init(int pifd) {
 	returnVal->prevSeconds = time_time();
 	returnVal->ac = ac;
 	returnVal->angleOutputDiff = 0;
+	rightOutput = 0;
+	leftOutput = 0;
 	return returnVal;
 }
 
-void Control_updateAngle(Control_T oControl) {
+double Control_turnRightOutput(Control_T oControl) {
+	return 0.5*oControl->angleOutputDiff * ANGLECOEFF; // + oControl->wallOutput * WALLCOEFF, etc.
+}
+
+double Control_turnLeftOutput(Control_T oControl) {
+	return -0.5*oControl->angleOutputDiff * ANGLECOEFF; // + oControl->wallOutput * WALLCOEFF, etc.
+}
+
+void Control_turnUpdateAngle(Control_T oControl) {
 	double angle, dAngle, dt, inputDiff;
 	double secs;
 
-	// Hi Changyan! I found this bug but I don't want to fix it because I don't quite understand everything you are doing
-	// Anyway, use time_time() instead of gpioTime(int,*int,*int), which just returns a double with the current time in it
-	// It should actually make things easier since you only need to store one prevSeconds now (which is a double) instead of separate seconds and microseconds
 	secs = time_time();
 	dt = secs - oControl->prevSeconds;
 
 	oControl->prevSeconds = secs;
 	angle = Sensor_getCompass();
 	dAngle = Sensor_getGyro();
-	inputDiff = Control_getRightOutput(oControl) - Control_getLeftOutput(oControl);
+	inputDiff = Control_turnRightOutput(oControl) - Control_turnLeftOutput(oControl);
 	oControl->angleOutputDiff = AC_update(oControl->ac, angle, dAngle, dt, inputDiff);
-	Motor_setRight(Control_getRightOutput(oControl));
-	Motor_setLeft(Control_getLeftOutput(oControl));
+	Motor_setRight(Control_turnRightOutput(oControl));
+	Motor_setLeft(Control_turnLeftOutput(oControl));
 }
 
-double Control_getRightOutput(Control_T oControl) {
-	return 0.5*oControl->angleOutputDiff * ANGLECOEFF; // + oControl->wallOutput * WALLCOEFF, etc.
+// essentially, turn in place for secs seconds
+void Control_turnNorth(Control_T oControl, double secs) {
+	double time1, time2;
+
+	time2 = time_time();
+	Control_changeHomeAngle(oControl, 0);
+	// for secs seconds, use angle control only (ignore all other forms of control)
+	for (time1 = time_time(); time2 - time1 < secs; time2 = time_time()) {
+		Control_turnUpdateAngle(oControl);
+	}
+}
+void Control_turnEast(Control_T oControl, double secs) {
+	double time1, time2;
+	time2 = time_time();
+	Control_changeHomeAngle(oControl, PI/2);
+	for (time1 = time_time(); time2 - time1 < secs; time2 = time_time()) {
+		Control_turnUpdateAngle(oControl);
+	}
+}
+void Control_turnSouth(Control_T oControl, double secs) {
+	double time1, time2;
+	time2 = time_time();
+	Control_changeHomeAngle(oControl, PI);
+	for (time1 = time_time(); time2 - time1 < secs; time2 = time_time()) {
+		Control_turnUpdateAngle(oControl);
+	}
+}
+void Control_turnWest(Control_T oControl, double secs) {
+	double time1, time2;
+	time2 = time_time();
+	Control_changeHomeAngle(oControl, PI*(1.5));
+	for (time1 = time_time(); time2 - time1 < secs; time2 = time_time()) {
+		Control_turnUpdateAngle(oControl);
+	}
 }
 
-double Control_getLeftOutput(Control_T oControl) {
-	return -0.5*oControl->angleOutputDiff * ANGLECOEFF; // + oControl->wallOutput * WALLCOEFF, etc.
+void Control_advance(Control_T oControl) {
+
 }
 
 void Control_changeHomeAngle(Control_T oControl, double newHome) {
