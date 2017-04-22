@@ -30,9 +30,9 @@ const int GYRO_ADDR = 0x6B; // 7 bit 1101011;
 const int GYRO_BUS = 0; // check http://abyz.co.uk/rpi/pigpio/python.html#i2c_open
 const int COMPASS_ADDR = 0x1E; // if it's wrong, try 1F
 const int COMPASS_BUS = 0;
-const int SHORT_ADDR_A = -1; // The original address
-const int SHORT_ADDR_B = -1;
-const int SHORT_ADDR_C = -1;
+const int SHORT_ADDR_A = 0x29; // The original address
+const int SHORT_ADDR_B = 0x30;
+const int SHORT_ADDR_C = 0x31;
 const int LONG_ADDR_A = -1;  // The original address
 const int LONG_ADDR_B = -1;
 
@@ -98,14 +98,15 @@ int Sensor_init(int pifd){
   pi = pifd;
   adafruit_distance_set_pi_handle(pi);
   
-  /*short_A_handle = i2c_open(pi, BUS, SHORT_ADDR_A, 0);
-  short_B_handle = i2c_open(pi, BUS, SHORT_ADDR_B, 0);
+  short_A_handle = i2c_open(pi, BUS, SHORT_ADDR_A, 0);
+  /*short_B_handle = i2c_open(pi, BUS, SHORT_ADDR_B, 0);
   short_C_handle = i2c_open(pi, BUS, SHORT_ADDR_C, 0);
   
   // change address of short range
   gpio_write(pi, SHORT_SHUTDOWN_A, 1); // TODO is 1 alive or dead?
-  gpio_write(pi, SHORT_SHUTDOWN_B, 1);
+  //gpio_write(pi, SHORT_SHUTDOWN_B, 1); */
   adafruit_distance_begin(short_A_handle);
+  /*
   adafruit_distance_change_address(short_A_handle, SHORT_ADDR_C);
   
   gpio_write(pi, SHORT_SHUTDOWN_B, 0);
@@ -145,7 +146,10 @@ void Sensor_calCompass(){
 }
 
 /* Return distance in cm */
-double Sensor_getShort(Dir_t dir);
+double Sensor_getShort(){//Dir_t dir) {
+  return adafruit_distance_readRange(short_A_handle);
+}
+
 double Sensor_getLong(Dir_t dir);
 
 /* Any Cleanup */
