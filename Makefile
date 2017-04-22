@@ -11,7 +11,7 @@ _DEPS = angleControl.h pid.h motors.h sensors.h kalman.h control.h adafruit_dist
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 # Add all C files here.
-_OBJ = LittleBro.o pid.o motors.o kalman.o angleControl.o sensors.o control.o adafruit_distance.o testDistance.o
+_OBJ = LittleBro.o pid.o motors.o kalman.o angleControl.o sensors.o control.o adafruit_distance.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 LIBS=-lm -lpigpiod_if2 -lrt

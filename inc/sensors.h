@@ -28,7 +28,7 @@ enum Dir_t {
 /* Return distance in cm */
 
 double Sensor_getShort();//Dir_t dir);
-double Sensor_getLong(Dir_t dir);
+double Sensor_getLong(enum Dir_t dir);
 
 /* Any Cleanup */
 void Sensor_free();

@@ -151,7 +151,7 @@ double Sensor_getShort(){//Dir_t dir) {
   return adafruit_distance_readRange(short_A_handle);
 }
 
-double Sensor_getLong(Dir_t dir);
+double Sensor_getLong(enum Dir_t dir);
 
 /* Any Cleanup */
 void Sensor_free(){

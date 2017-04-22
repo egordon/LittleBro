@@ -25,7 +25,7 @@ int main() {
   while (1) {
     int i = 0;
 
-    unsigned char buffer[32];
+    /*unsigned char buffer[32];
     buffer[6] = 42; // Sentinel to check whether it's being touched
     sleep(1);
     // yes, I think it's strange we're writing to the output register
@@ -36,16 +36,16 @@ int main() {
     for(i=0;i<7;i++){
       printf("%d: \t%d\n", i, buffer[i]);
     }
-    printf("\n");
+    printf("\n");*/
     
-    /*
+    
     for(i=0; i<10; i++){
   	data = i2c_read_byte_data(pi, handleA, regaddr+i);
   	printf("A, %x: data is %d = %x\n", regaddr+i, data, regaddr+i);
   	time_sleep(.1);
     }
     printf("\n");
-    */
+    
   }
   //handle = i2c_close(pi, bus);
 
