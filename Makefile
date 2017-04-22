@@ -11,7 +11,7 @@ _DEPS = angleControl.h pid.h motors.h sensors.h kalman.h control.h adafruit_dist
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 # Add all C files here.
-_OBJ = LittleBro.o pid.o motors.o kalman.o angleControl.o sensors.o control.o adafruit_distance.o
+_OBJ = LittleBro.o pid.o motors.o kalman.o angleControl.o sensors.o control.o adafruit_distance.o testDistance.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 LIBS=-lm -lpigpiod_if2 -lrt
@@ -29,6 +29,9 @@ testkalman.out: $(ODIR)/testkalman.o $(ODIR)/kalman.o meschach.a
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
 testi2c.out: $(ODIR)/testi2c.o
+	gcc -o $@ $^ $(CFLAGS) $(LIBS)
+
+testDistance.out: $(ODIR)/testDistance.o sensors.o adafruit_distance.o
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
 testpid.out: $(ODIR)/testpid.o $(ODIR)/pid.o
@@ -60,6 +63,9 @@ uploadLittlebro:
 	scp -r ./LittleBro.c pi:/home/pi/code
 
 uploadtesti2c:
+	scp -r ./testi2c.c pi:/home/pi/code
+
+uploadtestdistance:
 	scp -r ./testi2c.c pi:/home/pi/code
 
 upload: clean
