@@ -18,16 +18,16 @@ double Sensor_getCompass();
 void Sensor_calCompass();
 
 /* Linear Stuff */
-typedef enum {
+enum Dir_t {
 	kFRONT,
 	kBACK,
 	kLEFT,
 	kRIGHT
-} Dir_t;
+};
 
 /* Return distance in cm */
-double Sensor_getShort(Dir_t dir);
-double Sensor_getLong(Dir_t dir);
+double Sensor_getShort(enum Dir_t dir);
+double Sensor_getLong(enum Dir_t dir);
 
 /* Any Cleanup */
 void Sensor_free();
