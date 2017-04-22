@@ -16,7 +16,6 @@ int main(int argc, char** argv) {
 
 	int pifd = pigpio_start(NULL, NULL);
 	Sensor_init(pifd);
-	Sensor_calCompass();
 	oControl = Control_init(pifd);
 
 	while (1) {

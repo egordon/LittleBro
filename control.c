@@ -15,6 +15,8 @@
 #define WALLCOEFF 0.30
 #define GRIDCOEFF 0.50
 
+#define ROBOT_LENGTH (100) // in millimeters
+#define GRID_LENGTH(180)
 #define PI (3.1415926536)
 
 static double rightOutput = 0;
@@ -107,7 +109,14 @@ void Control_turnWest(Control_T oControl, double secs) {
 }
 
 void Control_advance(Control_T oControl) {
+	double distF, distB; // distance forwards, backwards
 
+
+	positionEstimate = Sensor_getLong()
+}
+
+double Control_estimateNumberOfSquares(double dist) {
+	return floor(dist/GRID_LENGTH);
 }
 
 void Control_changeHomeAngle(Control_T oControl, double newHome) {

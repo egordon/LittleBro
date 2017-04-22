@@ -68,7 +68,8 @@ int main() {
 		v_set_val(measurement, 0, pos);
 		v_set_val(measurement, 1, vel);
 		Kalman_update(kal, measurement, input, deltaT);
-		printf("Kalman state estimate is: %f \n", Kalman_get(kal));
+		printf("Input: Position %f, Velocity %f, DeltaTime %f, Input (Motors) %f", pos, vel, deltaT, input);
+		printf("The resulting Kalman state estimate is: %f \n", Kalman_get(kal));
 	}
 
 }

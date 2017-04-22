@@ -56,6 +56,12 @@ purge: clean
 	rm -rf mesch/*.o
 	rm -rf mesch
 
+uploadLittlebro:
+	scp -r ./LittleBro.c pi:/home/pi/code
+
+uploadtesti2c:
+	scp -r ./testi2c.c pi:/home/pi/code
+
 upload: clean
 	# Kill Previous Code
 	ssh pi 'killall LittleBro || true'
