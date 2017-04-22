@@ -31,7 +31,7 @@ testkalman.out: $(ODIR)/testkalman.o $(ODIR)/kalman.o meschach.a
 testi2c.out: $(ODIR)/testi2c.o
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
-testDistance.out: $(ODIR)/testDistance.o
+testDistance.out: $(ODIR)/testDistance.o sensors.o adafruit_distance.o
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
 testpid.out: $(ODIR)/testpid.o $(ODIR)/pid.o
