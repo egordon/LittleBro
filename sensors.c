@@ -25,11 +25,11 @@ long, short, short
 
 #define TWO_PI (2*3.1415926536)
 
-const int BUS = 0;
+const int BUS = 1;
 const int GYRO_ADDR = 0x6B; // 7 bit 1101011;
 const int GYRO_BUS = 1; // check http://abyz.co.uk/rpi/pigpio/python.html#i2c_open
 const int COMPASS_ADDR = 0x1E; // if it's wrong, try 1F
-const int COMPASS_BUS = 0;
+const int COMPASS_BUS = 1;
 const int SHORT_ADDR_A = 0x29; // The original address
 const int SHORT_ADDR_B = 0x30;
 const int SHORT_ADDR_C = 0x31;
@@ -85,8 +85,8 @@ static double getCompassRaw(){
   int16_t yRaw = i2c_read_word_data(pi, compass_handle, COMPASS_REGISTER_OUT_Y_L_M);
 
   double angle = atan2(yRaw, xRaw);
-  printf("yRaw: %d", yRaw);
-  return xRaw;
+  printf("xRaw: %d \tyRaw: %d \tangle: %f\n", xRaw, yRaw, angle);
+  return angle;
 }
 
 /**
@@ -118,7 +118,7 @@ int Sensor_init(int pifd){
   
   gyro_handle = i2c_open(pi, GYRO_BUS, GYRO_ADDR, 0);
   //acc_handle = i2c_open(ACC_BUS, ACC_ADDRESS);
-  //compass_handle = i2c_open(pi, COMPASS_BUS, COMPASS_ADDR, 0);
+  compass_handle = i2c_open(pi, COMPASS_BUS, COMPASS_ADDR, 0);
   //Sensors_calCompass();
   return 1; //success
 }
