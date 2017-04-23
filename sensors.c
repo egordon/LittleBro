@@ -27,7 +27,7 @@ long, short, short
 
 const int BUS = 0;
 const int GYRO_ADDR = 0x6B; // 7 bit 1101011;
-const int GYRO_BUS = 0; // check http://abyz.co.uk/rpi/pigpio/python.html#i2c_open
+const int GYRO_BUS = 1; // check http://abyz.co.uk/rpi/pigpio/python.html#i2c_open
 const int COMPASS_ADDR = 0x1E; // if it's wrong, try 1F
 const int COMPASS_BUS = 0;
 const int SHORT_ADDR_A = 0x29; // The original address

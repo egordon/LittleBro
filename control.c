@@ -28,7 +28,7 @@ struct Control {
 
 	int prevSeconds;
 	// seconds elapsed since pigpio was initialized
-	// as measured during the most recent Control_updateAngle() call
+	// as measured during the most recent Control_turnUpdateAngle() or Control_updateAngle() call
 	AngleState_T ac;
 	double angleOutputDiff;
 	// eventually add things like:
@@ -50,15 +50,34 @@ Control_T Control_init(int pifd) {
 	return returnVal;
 }
 
-double Control_turnRightOutput(Control_T oControl) {
+static double Control_turnRightOutput(Control_T oControl) {
+	// during Control_turnUpdateAngle, only this is used to calculate
+	// motor voltages
+	// during Control_advance, this term is added to the other motor voltage
+	// contributors, particularly the PID loop for moving forwards/backwards, and
+	// the control for avoiding walls on the left and right.
 	return 0.5*oControl->angleOutputDiff * ANGLECOEFF; // + oControl->wallOutput * WALLCOEFF, etc.
 }
 
-double Control_turnLeftOutput(Control_T oControl) {
+static double Control_turnLeftOutput(Control_T oControl) {
 	return -0.5*oControl->angleOutputDiff * ANGLECOEFF; // + oControl->wallOutput * WALLCOEFF, etc.
 }
 
-void Control_turnUpdateAngle(Control_T oControl) {
+static double Control_updateAngle(Control_T oControl) {
+	double angle, dAngle, dt, inputDiff;
+	double secs;
+
+	secs = time_time();
+	dt = secs - oControl->prevSeconds;
+
+	oControl->prevSeconds = secs;
+	angle = Sensor_getCompass();
+	dAngle = Sensor_getGyro();
+	inputDiff = Control_turnRightOutput(oControl) - Control_turnLeftOutput(oControl);
+	oControl->angleOutputDiff = AC_update(oControl->ac, angle, dAngle, dt, inputDiff);
+}
+
+static void Control_turnUpdateAngle(Control_T oControl) {
 	double angle, dAngle, dt, inputDiff;
 	double secs;
 
@@ -110,17 +129,19 @@ void Control_turnWest(Control_T oControl, double secs) {
 	}
 }
 
-int Control_estimateNumberOfSquares(double dist) {
+static int Control_estimateNumberOfSquares(double dist) {
 	return floor(dist/GRID_LENGTH);
 }
 
-void Control_advanceShort() {
+static void Control_advanceShort(Control_T oControl) {
 	int i, j = 0;
 	double temp, dist = 0, num = 0, motorOut;
 	PID_T pid = PID_init(0);
 	PID_setpoint(pid, 44);
 	PID_gains(pid, 63.6, 0, 0);
 	PID_clamp(pid, -10, 25);
+	Control_updateAngle(oControl);
+
 	for (i = 0; i < 10; i++) {
 		temp = Sensor_getShort(kFRONT);
 		if (temp != -1) {
@@ -134,6 +155,7 @@ void Control_advanceShort() {
 	Motor_setLeft(motorOut);
 	Motor_setRight(motorOut);
 	while((dist > 48)||(dist < 40)) {
+		Control_updateAngle(oControl);
 		j++;
 		dist = 0;
 		num = 0;
@@ -148,17 +170,18 @@ void Control_advanceShort() {
 
 		motorOut = PID_update(pid, dist);
 		if (j%2 == 0) {
-			Motor_setLeft(motorOut);
-			Motor_setRight(motorOut);
+			Motor_setLeft(motorOut + Control_turnLeftOutput(oControl));
+			Motor_setRight(motorOut + Control_turnRightOutput(oControl));
 		}
 		else {
-			Motor_setRight(motorOut);
-			Motor_setLeft(motorOut);
+			Motor_setRight(motorOut + Control_turnRightOutput(oControl));
+			Motor_setLeft(motorOut + Control_turnLeftOutput(oControl));
 		}
 	}
 	PID_free(pid);
 }
 
+// advance one square forward in the maze
 // return 0 if success
 int Control_advance(Control_T oControl) {
 	double longF = 0, longB = 0, shortF = 0; // distance forwards, backwards
@@ -171,7 +194,6 @@ int Control_advance(Control_T oControl) {
 	PID_T pid = PID_init(0);
 	PID_gains(pid, 63.6, 0, 0);
 	PID_clamp(pid, -10, 25);
-
 
 	// get current position
 	for (i = 0; i < 25; i++) {
@@ -198,6 +220,9 @@ int Control_advance(Control_T oControl) {
 			numShortF++;
 		}
 	}
+
+	Control_updateAngle(oControl);
+
 	longF /= numLongF;
 	longB /= numLongB;
 	shortF /= numShortF;
@@ -209,7 +234,7 @@ int Control_advance(Control_T oControl) {
 	// the bot is close to the forward wall, transfer motor control to Control_advanceShort()
 	if ((numShortF >= 10)&&(shortF <= 150)) {
 		PID_free(pid);
-		Control_advanceShort();
+		Control_advanceShort(oControl);
 		return 0;
 	}
 
@@ -223,6 +248,8 @@ int Control_advance(Control_T oControl) {
 		PID_setpoint(pid, fDest);
 
 		while ((longF - fDest >= 1) || (longF - fDest <= 1)) {
+			Control_updateAngle(oControl);
+
 			j++;
 
 			longF = 0;
@@ -254,7 +281,7 @@ int Control_advance(Control_T oControl) {
 
 			if ((numShortF >= 10)&&(shortF <= 150)) {
 				PID_free(pid);
-				Control_advanceShort();
+				Control_advanceShort(oControl);
 				return 0;
 			}
 
@@ -262,14 +289,15 @@ int Control_advance(Control_T oControl) {
 			// averaged the longF and longB values to estimate current position
 			motorOut = PID_update(pid, longF);
 			if (j%2 == 0) {
-				Motor_setLeft(motorOut);
-				Motor_setRight(motorOut);
+				Motor_setLeft(motorOut + Control_turnLeftOutput(oControl));
+				Motor_setRight(motorOut+ Control_turnRightOutput(oControl));
 			}
 			else {
-				Motor_setRight(motorOut);
-				Motor_setLeft(motorOut);
+				Motor_setRight(motorOut + Control_turnRightOutput(oControl));
+				Motor_setLeft(motorOut + Control_turnLeftOutput(oControl));
 			}
 		}
+		PID_free(pid);
 		return 0;
 	}
 
@@ -280,6 +308,8 @@ int Control_advance(Control_T oControl) {
 		PID_setpoint(pid, fDest);
 
 		while ((longF - fDest >= 1) || (longF - fDest <= 1)) {
+			Control_updateAngle(oControl);
+
 			j++;
 			longF = 0;
 			numLongF = 0;
@@ -302,20 +332,21 @@ int Control_advance(Control_T oControl) {
 
 			if ((numShortF >= 10)&&(shortF <= 150)) {
 				PID_free(pid);
-				Control_advanceShort();
+				Control_advanceShort(oControl);
 				return 0;
 			}
 
 			motorOut = PID_update(pid, longF);
 			if (j%2 == 0) {
-				Motor_setLeft(motorOut);
-				Motor_setRight(motorOut);
+				Motor_setLeft(motorOut + Control_turnLeftOutput(oControl));
+				Motor_setRight(motorOut + Control_turnRightOutput(oControl));
 			}
 			else {
-				Motor_setRight(motorOut);
-				Motor_setLeft(motorOut);
+				Motor_setRight(motorOut + Control_turnRightOutput(oControl));
+				Motor_setLeft(motorOut + Control_turnLeftOutput(oControl));
 			}
 		}
+		PID_free(pid);
 		return 0;
 	}
 
@@ -325,6 +356,8 @@ int Control_advance(Control_T oControl) {
 		PID_setpoint(pid, -1 * bDest);
 
 		while ((longB - bDest >= 1) || (longB - bDest <= 1)) {
+			Control_updateAngle(oControl);
+
 			j++;
 
 			longB = 0;
@@ -348,20 +381,21 @@ int Control_advance(Control_T oControl) {
 
 			if ((numShortF >= 10)&&(shortF <= 150)) {
 				PID_free(pid);
-				Control_advanceShort();
+				Control_advanceShort(oControl);
 				return 0;
 			}
 
 			motorOut = PID_update(pid, -1 * longB);
 			if (j%2 == 0) {
-				Motor_setLeft(motorOut);
-				Motor_setRight(motorOut);
+				Motor_setLeft(motorOut + Control_turnLeftOutput(oControl));
+				Motor_setRight(motorOut + Control_turnRightOutput(oControl));
 			}
 			else {
-				Motor_setRight(motorOut);
-				Motor_setLeft(motorOut);
+				Motor_setRight(motorOut + Control_turnRightOutput(oControl));
+				Motor_setLeft(motorOut + Control_turnLeftOutput(oControl));
 			}
 		}
+		PID_free(pid);
 		return 0;
 	}
 
@@ -369,7 +403,7 @@ int Control_advance(Control_T oControl) {
 	return 0;
 }
 
-void Control_changeHomeAngle(Control_T oControl, double newHome) {
+static void Control_changeHomeAngle(Control_T oControl, double newHome) {
 	AC_changeHome(oControl->ac, newHome);
 }
 

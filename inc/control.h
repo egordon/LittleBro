@@ -9,8 +9,6 @@ Control_T Control_init(int pifd);
 
 // updates the AngleState object inside of oControl, by reading the gyro and compass
 // then using the AC_update() function from angleControl.c
-// then calls Control_getRightOutput() to aggregate the different control setups
-// Then, outputs the correct voltage to the motors
 void Control_updateAngle(Control_T oControl);
 
 // return the current output to the right motor
