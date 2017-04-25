@@ -28,7 +28,7 @@ long, short, short
 const int BUS = 1;
 const int GYRO_ADDR = 0x6B; // 7 bit 1101011;
 const int GYRO_BUS = 1; // check http://abyz.co.uk/rpi/pigpio/python.html#i2c_open
-const int COMPASS_ADDR = 0x1E; // if it's wrong, try 1F
+const int COMPASS_ADDR = 0x1D; // if it's wrong, try 1F
 const int COMPASS_BUS = 1;
 const int SHORT_ADDR_A = 0x29; // The original address
 const int SHORT_ADDR_B = 0x30;
@@ -42,7 +42,7 @@ const int LONG_SHUTDOWN_A = -1;
 
 
 // The datasheet gives 8.75mdps/digit for default sensitivity
-const double RPS_PER_DIGIT = 0.00875*360/TWO_PI;
+const double RPS_PER_DIGIT = 0.00875*TWO_PI/360;
 
 enum {     
   GYRO_REGISTER_OUT_X_L             = 0x28,   //            r
@@ -59,12 +59,12 @@ enum {
   ACC_REGISTER_OUT_Z_L_A         = 0x2C,
   ACC_REGISTER_OUT_Z_H_A         = 0x2D,
 
-  COMPASS_REGISTER_OUT_X_H_M     = 0x03, // HEY! if these values are wrong, try adding 5 to each
-  COMPASS_REGISTER_OUT_X_L_M     = 0x04, // There's another version of this chip with those addresses
-  COMPASS_REGISTER_OUT_Y_H_M     = 0x05,
-  COMPASS_REGISTER_OUT_Y_L_M     = 0x06,
-  COMPASS_REGISTER_OUT_Z_H_M     = 0x07,
-  COMPASS_REGISTER_OUT_Z_L_M     = 0x08,
+  COMPASS_REGISTER_OUT_X_H_M     = 0x16, // HEY! if these values are wrong, try adding 5 to each
+  COMPASS_REGISTER_OUT_X_L_M     = 0x17, // There's another version of this chip with those addresses
+  COMPASS_REGISTER_OUT_Y_H_M     = 0x18,
+  COMPASS_REGISTER_OUT_Y_L_M     = 0x19,
+  COMPASS_REGISTER_OUT_Z_H_M     = 0x1A,
+  COMPASS_REGISTER_OUT_Z_L_M     = 0x1B,
 };
 
 static double compassOffset = 0;
@@ -81,12 +81,28 @@ static int pi;
 
 /* Local Functions */
 static double getCompassRaw(){
-  int16_t xRaw = i2c_read_word_data(pi, compass_handle, COMPASS_REGISTER_OUT_X_L_M);
-  int16_t yRaw = i2c_read_word_data(pi, compass_handle, COMPASS_REGISTER_OUT_Y_L_M);
+    int i=0;
+    int j;
+    int temp = 0;
+    //int16_t xRaw = i2c_read_byte_data(pi, compass_handle, COMPASS_REGISTER_OUT_X_L_M);
+    //int16_t yRaw = i2c_read_byte_data(pi, compass_handle, COMPASS_REGISTER_OUT_Y_L_M);
 
-  double angle = atan2(yRaw, xRaw);
-  printf("xRaw: %d \tyRaw: %d \tangle: %f\n", xRaw, yRaw, angle);
-  return angle;
+    unsigned char buffer[32];
+    buffer[6] = 42; // Sentinel to check whether it's being touched
+    temp = i2c_read_i2c_block_data(pi, compass_handle, COMPASS_REGISTER_OUT_X_L_M | 0x80, buffer, 6);
+    if (temp != 6) {
+      printf("ERROR: read_block_data returns %d\n", temp);
+    }
+
+    for(i=0;i<7;i++){
+      printf("%d: \t%d\n", i, buffer[i]);
+    }
+    printf("\n");
+
+  //double angle = atan2(yRaw, xRaw);
+  //printf("xRaw: %d \tyRaw: %d \tangle: %f\n", xRaw, yRaw, angle);
+  //printf("angle: %f\n", angle);
+  return 0;//angle;
 }
 
 /**
@@ -94,7 +110,7 @@ static double getCompassRaw(){
   * Return 1 on Success.
   * Return 0 on Failure
  **/
-int Sensor_init(int pifd){
+int Sensor_init(int pifd) {
   pi = pifd;
   adafruit_distance_set_pi_handle(pi);
   
@@ -119,6 +135,7 @@ int Sensor_init(int pifd){
   gyro_handle = i2c_open(pi, GYRO_BUS, GYRO_ADDR, 0);
   //acc_handle = i2c_open(ACC_BUS, ACC_ADDRESS);
   compass_handle = i2c_open(pi, COMPASS_BUS, COMPASS_ADDR, 0);
+  printf("compass_handle = %d\n", compass_handle);
   //Sensors_calCompass();
   return 1; //success
 }
@@ -126,9 +143,12 @@ int Sensor_init(int pifd){
 /* Return angle in radians or radians/s. */
 
 double Sensor_getGyro(){
-	// TODO: Choose an axis by changing this letter:                    V
-	int16_t raw = i2c_read_word_data(pi, gyro_handle, GYRO_REGISTER_OUT_X_L);
-  printf("raw is %d\n", raw);
+	unsigned char buffer[32];
+	int16_t raw;
+	i2c_read_i2c_block_data(pi, gyro_handle, GYRO_ADDR | 0x80, buffer, 6);
+	raw = ((int16_t)(buffer[3]) << 8) + (int16_t)(buffer[2]);
+
+  	printf("raw is %d\n", raw);
 	// needs to be 16 bits signed so the signs work out correctly
 
 	return raw * RPS_PER_DIGIT;
@@ -151,7 +171,9 @@ double Sensor_getShort(){//Dir_t dir) {
   return adafruit_distance_readRange(short_A_handle);
 }
 
-double Sensor_getLong(enum Dir_t dir);
+double Sensor_getLong(enum Dir_t dir) {
+  return 1;
+}
 
 /* Any Cleanup */
 void Sensor_free(){

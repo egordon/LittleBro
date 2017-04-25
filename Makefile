@@ -32,6 +32,9 @@ testi2c.out: $(ODIR)/testi2c.o
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
 testDistance.out: $(ODIR)/testDistance.o sensors.o adafruit_distance.o
+	cd obj
+	rm testDistance.o
+	cd ..
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
 testpid.out: $(ODIR)/testpid.o $(ODIR)/pid.o
@@ -65,8 +68,8 @@ uploadLittlebro:
 uploadtesti2c:
 	scp -r ./testi2c.c pi:/home/pi/code
 
-uploadtestdistance:
-	scp -r ./testi2c.c pi:/home/pi/code
+uploadtestDistance:
+	scp -r ./testDistance.c pi:/home/pi/code
 
 upload: clean
 	# Kill Previous Code
