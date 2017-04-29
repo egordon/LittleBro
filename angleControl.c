@@ -30,6 +30,19 @@ struct AngleState {
 	Kalman_T stateEstimator;
 
 };
+
+static void setMatVals(MAT *m, double v00, double v01, double v10, double v11) {
+	m_set_val(m, 0, 0, v00);
+	m_set_val(m, 0, 1, v01);
+	m_set_val(m, 1, 0, v10);
+	m_set_val(m, 1, 1, v11);
+}
+
+static void setVecVals(VEC *v, double v0, double v1) {
+	v_set_val(v, 0, v0);
+	v_set_val(v, 1, v1);
+}
+
 // TODO: fix memory leaks
 AngleState_T AC_init() {
 	FILE *fp;
@@ -42,20 +55,27 @@ AngleState_T AC_init() {
 	MAT *Q = m_get(2,2);
 	MAT *R = m_get(2,2);
 
-	fp = fopen(KALMANPARAMFILE, "r");
-
-	m_finput(fp, F);
+	//fp = fopen(KALMANPARAMFILE, "r");
+	// SEG FAULT HERE!!!!
+	/*m_finput(fp, F);
+	printf("ac6\n"); fflush(stdout);
 	v_finput(fp, B);
+	printf("ac7\n"); fflush(stdout);
 	m_finput(fp, H);
 	m_finput(fp, Q);
-	m_finput(fp, R);
+	m_finput(fp, R);*/
+	setMatVals(F, 1, 0.1, 0, 1);
+	setVecVals(B, 0, 3.944);
+	setMatVals(H, 1, 0, 0, 1);
+	setMatVals(Q, 0.01, 0, 0, 0.2);
+	setMatVals(R, 0.05, 0, 0, 0.2);
+
 	k = Kalman_init(F, B, H, Q, R);
 
 	p = PID_init(true);
 	PID_setpoint(p, 0);
 	PID_gains(p, PID_KP, PID_KI, PID_KD);
 	PID_clamp(p, PID_CLAMPMIN, PID_CLAMPMAX);
-
 	ac->pid = p;
 	ac->stateEstimator = k;
 	return ac;
@@ -76,7 +96,8 @@ double AC_update(AngleState_T ac, double angle, double dAngle, double dt, double
 
 	Kalman_update(ac->stateEstimator, measurement, inputDiff, dt);
 	currentAngle = Kalman_get(ac->stateEstimator);
-	return PID_update(ac->pid, PID_getSetpoint(ac->pid) - currentAngle);
+	V_FREE(measurement);
+	return PID_update(ac->pid, currentAngle, dt);
 	// may need to be multiplied by a constant
 }
 
@@ -89,5 +110,7 @@ double AC_getAngle(AngleState_T ac) {
 }
 
 void AC_free(AngleState_T ac) {
-
+	Kalman_free(ac->stateEstimator);
+	PID_free(ac->pid);
+	free(ac);
 }

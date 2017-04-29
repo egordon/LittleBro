@@ -96,6 +96,7 @@ void Kalman_update(Kalman_T kalman, VEC* measurement, double input, double delta
 		modPivot -= TWO_PI;
 	}
 	v_set_val(aPrioriEstimate, 0, modPivot);
+	printf("aPrioriEstimate:"); v_output(aPrioriEstimate);
 
 	// Predicted (a priori) estimate covariance  [aPrioriCov]
 	// aPrioriCov = (F_k)(P_k-1,k-1)(F_k^t) + Q_k
@@ -103,10 +104,12 @@ void Kalman_update(Kalman_T kalman, VEC* measurement, double input, double delta
 	m_transp(kalman->stateTransM, pivotM2);
 	m_mlt(pivotM1, pivotM2, pivotM3); // pivotM3 = (F_k)(P_k-1,k-1)(F_k^t)
 	m_add(pivotM3, kalman->processNoiseCov, aPrioriCov);
+	printf("aPrioriCov:"); m_output(aPrioriCov);
 
 	// Innovation or measurement residual  [measureResidual]
 	mv_mlt(kalman->observationM, aPrioriEstimate, pivotV1);
-	v_add(pivotV1, measurement, measureResidual);
+	sv_mlt(-1, pivotV1, pivotV2);
+	v_add(pivotV2, measurement, measureResidual);
 	modPivot = v_get_val(measureResidual, 0);
 	while (modPivot < 0) {
 		modPivot += TWO_PI;
@@ -115,6 +118,7 @@ void Kalman_update(Kalman_T kalman, VEC* measurement, double input, double delta
 		modPivot -= TWO_PI;
 	}
 	v_set_val(measureResidual, 0, modPivot);
+	printf("measureResidual:"); v_output(measureResidual);
 
 	// Innovation (or residual) covariance [residualCov]
 	m_mlt(kalman->observationM, aPrioriCov, pivotM1);
@@ -127,10 +131,12 @@ void Kalman_update(Kalman_T kalman, VEC* measurement, double input, double delta
 	m_mlt(aPrioriCov, pivotM1, pivotM2);
 	m_inverse(residualCov, pivotM3);
 	m_mlt(pivotM2, pivotM3, kalmanGain);
+	printf("kalmanGain:"); m_output(kalmanGain);
 
 	// updated (a posteriori) state estimate
 	mv_mlt(kalmanGain, measureResidual, pivotV1);
 	v_add(pivotV1, aPrioriEstimate, kalman->stateEstimate);
+	printf("kalman->stateEstimate:"); v_output(kalman->stateEstimate);
 
 	// updated (a posteriori) estimate covariance
 	m_mlt(kalmanGain, kalman->observationM, pivotM1);
@@ -158,5 +164,12 @@ double Kalman_get(Kalman_T kalman) {
 }
 
 void Kalman_free(Kalman_T oKalman) {
+	M_FREE(oKalman->stateTransM);
+	V_FREE(oKalman->controlInputM);
+	M_FREE(oKalman->observationM);
+	M_FREE(oKalman->errorCov);
+	V_FREE(oKalman->stateEstimate);
+	M_FREE(oKalman->processNoiseCov);
+	M_FREE(oKalman->observationNoiseCov);
 	free(oKalman);
 }

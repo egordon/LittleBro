@@ -32,9 +32,9 @@ testi2c.out: $(ODIR)/testi2c.o
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
 testDistance.out: $(ODIR)/testDistance.o sensors.o adafruit_distance.o
-	cd obj
-	rm testDistance.o
-	cd ..
+	gcc -o $@ $^ $(CFLAGS) $(LIBS)
+
+testAngle.out: $(ODIR)/testAngle.o sensors.o kalman.o meschach.a adafruit_distance.o
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
 
 testpid.out: $(ODIR)/testpid.o $(ODIR)/pid.o

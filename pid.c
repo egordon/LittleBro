@@ -66,8 +66,8 @@ void PID_clear(PID_T pid) {
 }
 
 /* Each iteration, get output from measurement. */
-double PID_update(PID_T pid, double measurement) {
-	double dVal, pidOut;
+double PID_update(PID_T pid, double measurement, double dt) {
+	double absDVal, dVal,pidOut;
 	double absError = pid->setPoint - measurement;
 	double error;
 
@@ -75,19 +75,33 @@ double PID_update(PID_T pid, double measurement) {
 	if (pid->isAngle == false) {
 		error = absError;
 	} else {
-		if (absError < (TWO_PI/2)) {
+		if ((absError < (TWO_PI/2))&&(absError > (-1*TWO_PI/2))) {
 			error = absError;
-		} else {
+		} else if (absError > (-1*TWO_PI/2)) {
 			error = absError - TWO_PI;
+		} else {
+			error = absError + TWO_PI;
 		}
 	}
 
 	pid->integral += error;
 
-	dVal = measurement - pid->prevMeasure;
+	absDVal = measurement - pid->prevMeasure;
+	if (pid->isAngle == false) {
+		dVal = absDVal;
+	} else {
+		if ((absDVal < (TWO_PI/2))&&(absDVal > (-1*TWO_PI/2))) {
+			dVal = absDVal;
+		} else if (absDVal > (-1*TWO_PI/2)) {
+			dVal = absDVal - TWO_PI;
+		} else {
+			dVal = absDVal + TWO_PI;
+		}
+	}
+
 	pid->prevMeasure = measurement;
 
-	pidOut = error * (pid->kp) + (pid->integral) * (pid->ki) + dVal * (pid->kd);
+	pidOut = error * (pid->kp) + (pid->integral) * (pid->ki) * dt + dVal * (pid->kd) / dt;
 
 	/* Clamp */
 	if (pid->hasClamp) {

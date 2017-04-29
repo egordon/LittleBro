@@ -44,6 +44,7 @@ a
 #include <stdarg.h>
 #include <kalman.h>
 #include <matrix.h>
+#include <sensors.h>
 
 //-----------------
 
