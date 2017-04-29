@@ -120,7 +120,7 @@ int Sensor_init(int pifd) {
   int CTRL5 = 0x24;
   int CTRL6 = 0x25;
   int CTRL7 = 0x26;
-  int i, success;
+  int i, j, success;
   char *temp = "i'm doomed";
 
   adafruit_distance_set_pi_handle(pi);
@@ -132,7 +132,9 @@ int Sensor_init(int pifd) {
   for(i=0; i<5; i++) {
     dist_handles[i] = i2c_open(pi, BUS, DIST_ADDRS[i], 0);
     if(dist_handles[i] < 0) printf("Bad handle for dist %d: %d\n", i, dist_handles[i]);
+    printf("handle %d is: %d  ", i, dist_handles[i]);
   }
+  printf("\n");
 
   //gpio_write(pi, SHORT_SHUTDOWN_A, DISTANCE_OFF); 
   //gpio_write(pi, SHORT_SHUTDOWN_B, DISTANCE_OFF);
@@ -178,12 +180,20 @@ int Sensor_init(int pifd) {
   for(i=0;i<3;i++) {
     printf("i=%d\n", i);
     if(DIST_SHUTDOWNS[i] != -1) gpio_write(pi, DIST_SHUTDOWNS[i], DISTANCE_ON); 
-    time_sleep(5);
-    printf("changing address\n");
+    //printf("changing address\n");
     adafruit_distance_change_address(dist_handles[4], DIST_ADDRS[i]);
     success = adafruit_distance_begin(dist_handles[i]);
     if(!success) printf("Distance sensor Error %d\n", i);
+
+    for(j=0; j<100;j++){
+      printf("%d: \t%d\n", i, adafruit_distance_readRange(dist_handles[i]));
+    }
   }
+
+  // Subtract these numbers from the thing
+  // i 19
+  // j 17
+  // k 12.5
 
   // TODO: long distance
 

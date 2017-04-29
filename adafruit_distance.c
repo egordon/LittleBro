@@ -160,6 +160,7 @@ void adafruit_distance_loadSettings(void) {
 /**************************************************************************/
 
 int adafruit_distance_readRange(int sensor_handle) {
+  current_handle = sensor_handle;
 
   int readOutput;
   while (! ((readOutput=adafruit_distance_read8(VL6180X_REG_RESULT_RANGE_STATUS)) & 0x01)) {
